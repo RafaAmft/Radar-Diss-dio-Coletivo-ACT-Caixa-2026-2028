@@ -4,6 +4,7 @@
 *.json
 !perfil_ministros_sdc_tst.json
 !comportamento_turmas_tst.json
+!monitoramento_diario_caixa.json
 scraping_dissidio_coletivo_greve/all_entity_records.json
 scraping_dissidio_coletivo_greve/sdc_all_ro_rot.json
 scraping_dissidio_coletivo_greve/sdc_all_dc_dcg.json
