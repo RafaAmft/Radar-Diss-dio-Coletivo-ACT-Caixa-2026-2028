@@ -1,0 +1,23 @@
+# Git Ignore para Radar Dissídio Coletivo
+
+# Arquivos JSON pesados de scraping bruto (> 30MB a 200MB - excedem limite GitHub)
+*.json
+!perfil_ministros_sdc_tst.json
+!comportamento_turmas_tst.json
+scraping_dissidio_coletivo_greve/all_entity_records.json
+scraping_dissidio_coletivo_greve/sdc_all_ro_rot.json
+scraping_dissidio_coletivo_greve/sdc_all_dc_dcg.json
+scraping_dissidio_coletivo_greve/turmas_records_cache.json
+scraping_dissidio_coletivo_greve/matched_ro_entities.json
+
+# Arquivos não relacionados do workspace pessoal
+PET_*.pdf
+colecao_perfumes.*
+
+# Python caches e ambientes
+__pycache__/
+*.py[cod]
+*$py.class
+*.env
+.venv/
+venv/

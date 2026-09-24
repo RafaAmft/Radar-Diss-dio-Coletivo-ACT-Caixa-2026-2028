@@ -1,0 +1,85 @@
+{
+  "turmas_summary": [
+    {
+      "Turma do TST": "1ª Turma",
+      "Total de Julgamentos Analisados": 44,
+      "Julgamentos sobre Dias Parados": 17,
+      "Taxa Desconto Mantido / Pró-Empresa (%)": 29.4,
+      "Taxa Devolução/Compensação / Pró-Trabalhador (%)": 23.5,
+      "Aplicação da Súmula 126 / Óbice Fático (%)": 34.1,
+      "Principal Ministro(a) Relator(a)": "Amaury Rodrigues Pinto Junior (23 acórdãos)",
+      "Perfil Doutrinário e Tendência da Turma": "Institucional-legalista: alto rigor processual com frequente aplicação da Súmula 126 e respeito ao precedente do STF"
+    },
+    {
+      "Turma do TST": "2ª Turma",
+      "Total de Julgamentos Analisados": 38,
+      "Julgamentos sobre Dias Parados": 7,
+      "Taxa Desconto Mantido / Pró-Empresa (%)": 0.0,
+      "Taxa Devolução/Compensação / Pró-Trabalhador (%)": 0.0,
+      "Aplicação da Súmula 126 / Óbice Fático (%)": 50.0,
+      "Principal Ministro(a) Relator(a)": "Maria Helena Mallmann (16 acórdãos)",
+      "Perfil Doutrinário e Tendência da Turma": "Institucional-legalista: alto rigor processual com frequente aplicação da Súmula 126 e respeito ao precedente do STF"
+    },
+    {
+      "Turma do TST": "3ª Turma",
+      "Total de Julgamentos Analisados": 55,
+      "Julgamentos sobre Dias Parados": 13,
+      "Taxa Desconto Mantido / Pró-Empresa (%)": 7.7,
+      "Taxa Devolução/Compensação / Pró-Trabalhador (%)": 38.5,
+      "Aplicação da Súmula 126 / Óbice Fático (%)": 63.6,
+      "Principal Ministro(a) Relator(a)": "Alberto Bastos Balazeiro (21 acórdãos)",
+      "Perfil Doutrinário e Tendência da Turma": "Social-protetiva: maior sensibilidade à compensação negociada de horas e proteção contra despedida abusiva de grevista"
+    },
+    {
+      "Turma do TST": "4ª Turma",
+      "Total de Julgamentos Analisados": 84,
+      "Julgamentos sobre Dias Parados": 70,
+      "Taxa Desconto Mantido / Pró-Empresa (%)": 2.9,
+      "Taxa Devolução/Compensação / Pró-Trabalhador (%)": 24.3,
+      "Aplicação da Súmula 126 / Óbice Fático (%)": 36.9,
+      "Principal Ministro(a) Relator(a)": "Alexandre Luiz Ramos (68 acórdãos)",
+      "Perfil Doutrinário e Tendência da Turma": "Liberal / Pró-segurança jurídica: rigorosa na aplicação da OJ 10 da SDC e Tema 435 do STF (legitimidade do desconto salarial)"
+    },
+    {
+      "Turma do TST": "5ª Turma",
+      "Total de Julgamentos Analisados": 48,
+      "Julgamentos sobre Dias Parados": 10,
+      "Taxa Desconto Mantido / Pró-Empresa (%)": 20.0,
+      "Taxa Devolução/Compensação / Pró-Trabalhador (%)": 40.0,
+      "Aplicação da Súmula 126 / Óbice Fático (%)": 56.2,
+      "Principal Ministro(a) Relator(a)": "Douglas Alencar Rodrigues (21 acórdãos)",
+      "Perfil Doutrinário e Tendência da Turma": "Liberal / Pró-segurança jurídica: rigorosa na aplicação da OJ 10 da SDC e Tema 435 do STF (legitimidade do desconto salarial)"
+    },
+    {
+      "Turma do TST": "6ª Turma",
+      "Total de Julgamentos Analisados": 55,
+      "Julgamentos sobre Dias Parados": 20,
+      "Taxa Desconto Mantido / Pró-Empresa (%)": 10.0,
+      "Taxa Devolução/Compensação / Pró-Trabalhador (%)": 10.0,
+      "Aplicação da Súmula 126 / Óbice Fático (%)": 60.0,
+      "Principal Ministro(a) Relator(a)": "Augusto Cesar Leite De Carvalho (29 acórdãos)",
+      "Perfil Doutrinário e Tendência da Turma": "Social-protetiva: maior sensibilidade à compensação negociada de horas e proteção contra despedida abusiva de grevista"
+    },
+    {
+      "Turma do TST": "7ª Turma",
+      "Total de Julgamentos Analisados": 42,
+      "Julgamentos sobre Dias Parados": 20,
+      "Taxa Desconto Mantido / Pró-Empresa (%)": 15.0,
+      "Taxa Devolução/Compensação / Pró-Trabalhador (%)": 20.0,
+      "Aplicação da Súmula 126 / Óbice Fático (%)": 50.0,
+      "Principal Ministro(a) Relator(a)": "Evandro Pereira Valadao Lopes (12 acórdãos)",
+      "Perfil Doutrinário e Tendência da Turma": "Equilibrada / Moderada: forte tendência à manutenção do acórdão do TRT de origem salvo flagrante violação literal"
+    },
+    {
+      "Turma do TST": "8ª Turma",
+      "Total de Julgamentos Analisados": 30,
+      "Julgamentos sobre Dias Parados": 8,
+      "Taxa Desconto Mantido / Pró-Empresa (%)": 0.0,
+      "Taxa Devolução/Compensação / Pró-Trabalhador (%)": 37.5,
+      "Aplicação da Súmula 126 / Óbice Fático (%)": 40.0,
+      "Principal Ministro(a) Relator(a)": "Sergio Pinto Martins (12 acórdãos)",
+      "Perfil Doutrinário e Tendência da Turma": "Equilibrada / Moderada: forte tendência à manutenção do acórdão do TRT de origem salvo flagrante violação literal"
+    }
+  ],
+  "total_cases_analyzed": 396
+}

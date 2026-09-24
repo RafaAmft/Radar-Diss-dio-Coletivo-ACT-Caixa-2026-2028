@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dissídio ACT Caixa 2026 — Painel Tático do Empregado</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    .tab-btn { transition: all 0.2s ease; cursor: pointer; }
+    .tab-btn.active { border-bottom: 3px solid var(--primary); color: var(--primary); font-weight: 600; }
+    .tab-btn:not(.active) { border-bottom: 3px solid transparent; opacity: 0.7; }
+    .tab-btn:hover:not(.active) { opacity: 1; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+    .fade-in { animation: fadeIn 0.3s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .bar { transition: width 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94); border-radius: 6px; }
+    .glow-amber { box-shadow: 0 0 16px rgba(245, 158, 11, 0.2); }
+    .glow-blue { box-shadow: 0 0 16px rgba(59, 130, 246, 0.2); }
+    .glow-green { box-shadow: 0 0 16px rgba(34, 197, 94, 0.2); }
+    .glow-red { box-shadow: 0 0 16px rgba(239, 68, 68, 0.2); }
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: 9999px; font-size: 11px; font-weight: 600; }
+    .faq-item summary { cursor: pointer; list-style: none; }
+    .faq-item summary::-webkit-details-marker { display: none; }
+    .faq-item summary::before { content: '▸'; margin-right: 8px; transition: transform 0.2s; display: inline-block; }
+    .faq-item[open] summary::before { transform: rotate(90deg); }
+    .filter-btn { transition: all 0.2s ease; cursor: pointer; }
+    .filter-btn.active { background: var(--primary); color: var(--primary-foreground); font-weight: 600; border-color: var(--primary); }
+  </style>
+</head>
+<body class="bg-[var(--background)] text-[var(--foreground)] antialiased">
+
+  <!-- HEADER COM STATUS DO DISSÍDIO ATUAL -->
+  <header class="border-b border-[var(--border)] px-6 py-4 bg-[var(--card)] sticky top-0 z-30 shadow-sm">
+    <div class="max-w-[1300px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-3">
+          <span class="text-2xl">🏦</span>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-lg md:text-xl font-bold tracking-tight">Dissídio Coletivo ACT Caixa 2026/2028</h1>
+              <span class="badge bg-amber-500/15 text-amber-500 border border-amber-500/30 animate-pulse">
+                ⚡ Ajuizado Hoje (24/09)
+              </span>
+            </div>
+            <p class="text-xs text-[var(--muted-foreground)] mt-0.5">
+              Painel tático de inteligência jurídica para empregados da Caixa Econômica Federal
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 text-xs bg-[var(--content)] border border-[var(--border)] rounded-lg px-3 py-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-blue-500 animate-ping"></span>
+        <span><strong>Fase:</strong> Mediação Pré-Processual (Vice-Presidência TST • Min. Caputo Bastos)</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- NAVEGAÇÃO POR ABAS ESTRATÉGICAS -->
+  <nav class="border-b border-[var(--border)] px-6 bg-[var(--card)]">
+    <div class="max-w-[1300px] mx-auto flex gap-1 overflow-x-auto">
+      <button class="tab-btn active px-4 py-3 text-sm whitespace-nowrap" onclick="showTab('clausulas')" id="tab-clausulas">
+        🌡️ Termômetro do ACT (Cláusulas)
+      </button>
+      <button class="tab-btn px-4 py-3 text-sm whitespace-nowrap" onclick="showTab('radar')" id="tab-radar">
+        🚨 Radar do Dissídio 2026
+      </button>
+      <button class="tab-btn px-4 py-3 text-sm whitespace-nowrap" onclick="showTab('mediador')" id="tab-mediador">
+        🤝 O Mediador (Min. Caputo Bastos)
+      </button>
+      <button class="tab-btn px-4 py-3 text-sm whitespace-nowrap" onclick="showTab('stf')" id="tab-stf">
+        ⚖️ STF, SEST & Riscos
+      </button>
+      <button class="tab-btn px-4 py-3 text-sm whitespace-nowrap" onclick="showTab('sdc')" id="tab-sdc">
+        🏛️ Se a Mediação Fracassar (SDC)
+      </button>
+    </div>
+  </nav>
+
+  <!-- ÁREA DE CONTEÚDO -->
+  <main class="max-w-[1300px] mx-auto px-6 py-6">
+
+    <!-- ==================== ABA 1: TERMÔMETRO DO ACT (ENRIQUECIDO) ==================== -->
+    <div id="panel-clausulas" class="fade-in space-y-6">
+
+      <!-- Banner Introdutório do Termômetro -->
+      <div class="card glow-blue border-blue-500/20">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="badge bg-blue-500/15 text-blue-400">ANÁLISE MULTIDIMENSIONAL</span>
+              <span class="text-xs text-[var(--muted-foreground)]">Campanha Salarial 2026 × Jurisprudência TST</span>
+            </div>
+            <h2 class="text-base md:text-lg font-bold">O que está em disputa na mesa e o que o TST costuma decidir</h2>
+            <p class="text-xs text-[var(--muted-foreground)] mt-1 max-w-3xl">
+              Cada cláusula traz 4 camadas práticas: o nó do impasse atual, a tendência histórica nos 179 acórdãos da Caixa no TST, o impacto direto no seu contracheque e a proposta de meio-termo que o mediador costuma formular.
+            </p>
+          </div>
+          <!-- Filtros de Navegação Rápida -->
+          <div class="flex flex-wrap gap-1.5 bg-[var(--content)] p-1.5 rounded-xl border border-[var(--border)] flex-shrink-0">
+            <button class="filter-btn active text-xs px-3 py-1.5 rounded-lg border border-transparent" onclick="filterClausulas('todas')" id="btn-todas">
+              Todas
+            </button>
+            <button class="filter-btn text-xs px-3 py-1.5 rounded-lg border border-transparent text-[var(--muted-foreground)]" onclick="filterClausulas('bolso')" id="btn-bolso">
+              💰 No Bolso
+            </button>
+            <button class="filter-btn text-xs px-3 py-1.5 rounded-lg border border-transparent text-[var(--muted-foreground)]" onclick="filterClausulas('jornada')" id="btn-jornada">
+              ⏰ Trabalho
+            </button>
+            <button class="filter-btn text-xs px-3 py-1.5 rounded-lg border border-transparent text-[var(--muted-foreground)]" onclick="filterClausulas('protecao')" id="btn-protecao">
+              🛡️ Proteção
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARDS DETALHADOS DAS CLÁUSULAS -->
+      <div class="space-y-4" id="clausulas-container">
+
+        <!-- 1. SAÚDE CAIXA -->
+        <div class="card clausula-card border-blue-500/30" data-cat="bolso">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-[var(--border)]">
+            <div class="flex items-center gap-3">
+              <span class="w-10 h-10 rounded-xl bg-blue-500/15 flex items-center justify-center text-xl">🏥</span>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="font-bold text-base text-[var(--foreground)]">Saúde Caixa (Custeio, Teto de 6,5% e Pós-2018)</h3>
+                  <span class="badge bg-red-500/15 text-red-400 border border-red-500/30">Nível: 🔴 Crítico</span>
+                </div>
+                <div class="text-[11px] text-[var(--muted-foreground)]">Frequência em litígios Caixa no TST: <strong>48,8% dos casos</strong></div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 text-xs">
+              <span class="text-[var(--muted-foreground)]">Risco em Julgamento Normativo:</span>
+              <span class="badge bg-amber-500/15 text-amber-400">⚠️ Médio-Alto (Limite SEST)</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mt-4 text-xs">
+            <div class="bg-[var(--content)] p-3 rounded-lg border border-[var(--border)]">
+              <span class="text-[10px] text-red-400 font-bold uppercase block mb-1">1. O Impasse da Mesa (2026)</span>
+              <p class="text-[var(--muted-foreground)]">
+                <strong>Caixa:</strong> Limita o custeio patronal a 6,5% da folha (Portaria SEST), repassando déficits aos usuários e travando a inclusão plena dos admitidos pós-2018.<br>
+                <strong>Comando:</strong> Fim do teto de 6,5%, manutenção do modelo 70/30 e garantia do plano para todos os empregados.
+              </p>
+            </div>
+            <div class="bg-[var(--content)] p-3 rounded-lg border border-[var(--border)]">
+              <span class="text-[10px] text-blue-400 font-bold uppercase block mb-1">2. O que o TST Decide Historicamente</span>
+              <p class="text-[var(--muted-foreground)]">
+                A SDC <strong>não suprime plano de saúde já existente</strong> (aplica princípio da condição mais benéfica), mas <strong>nega criação de novos custos</strong> sem aval orçamentário. Portanto, se for para sentença, o TST não derruba o teto da SEST por conta própria.
+              </p>
+            </div>
+            <div class="bg-[var(--content)] p-3 rounded-lg border border-[var(--border)]">
+              <span class="text-[10px] text-amber-400 font-bold uppercase block mb-1">3. Impacto Direto no Seu Bolso</span>
+              <p class="text-[var(--muted-foreground)]">
+                Se a Caixa vencer na imposição do teto de 6,5%, a coparticipação dos empregados em consultas e exames pode subir de 30% para 40%–50%, com risco de mensalidades extraordinárias por titular e dependente em caso de déficit atuarial.
+              </p>
+            </div>
+            <div class="bg-[var(--content)] p-3 rounded-lg border border-[var(--border)]">
+              <span class="text-[10px] text-green-400 font-bold uppercase block mb-1">4. Proposta Típica do Min. Caputo Bastos</span>
+              <p class="text-[var(--muted-foreground)]">
+                <strong>Solução de meio-termo na mediação:</strong> Prorrogação das condições vigentes do Saúde Caixa sem reajuste de coparticipação imediato, criando uma mesa temática paritária com prazo de 90 a 180 dias para equacionar o déficit sem onerar o piso salarial.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. PLR SOCIAL -->
+        <div class="card clausula-card border-green-500/30" data-cat="bolso">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-[var(--border)]">
+            <div class="flex items-center gap-3">
+              <span class="w-10 h-10 rounded-xl bg-green-500/15 flex items-center justify-center text-xl">💰</span>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="font-bold text-base text-[var(--foreground)]">PLR Social e Regra Fenaban</h3>
+                  <span class="badge bg-amber-500/15 text-amber-400 border border-amber-500/30">Nível: 🟡 Médio</span>
+                </div>
+                <div class="text-[11px] text-[var(--muted-foreground)]">Frequência em litígios Caixa no TST: <strong>34,9% dos casos</strong></div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 text-xs">
+              <span class="text-[var(--muted-foreground)]">Risco em Julgamento Normativo:</span>
+              <span class="badge bg-green-500/15 text-green-400">🟢 Baixo (Precedente Consolidado)</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mt-4 text-xs">
+            <div class="bg-[var(--content)] p-3 rounded-lg border border-[var(--border)]">
+              <span class="text-[10px] text-red-400 font-bold uppercase block mb-1">1. O Impasse da Mesa (2026)</span>
+              <p class="text-[var(--muted-foreground)]">
+                <strong>Caixa:</strong> Pagamento da regra básica da Fenaban atrelado a metas rígidas de ROE e eficiência, limitando o peso da parcela social linear.<br>
+                <strong>Comando:</strong> Distribuição linear de 4% do lucro líquido aos empregados (PLR Social), independentemente do atingimento de metas individuais de agência.
+              </p>
+            </div>
+            <div class="bg-[var(--content)] p-3 rounded-lg border border-[var(--border)]">
+              <span class="text-[10px] text-blue-400 font-bold uppercase block mb-1">2. O que o TST Decide Historicamente</span>
+              <p class="text-[var(--muted-foreground)]">
+                Nos julgamentos da CEF (inclusive no DCG de 2021), a SDC reconheceu que a PLR Social é cláusula de natureza pré-existente e que sua alteração unilateral constitui descumprimento de ACT. A corte tende a homologar a distribuição integral quando acordada.
+              </p>
+            </div>
+            <div class="bg-[var(--content)] p-3 rounded-lg border border-[var(--border)]">
+              <span class="text-[10px] text-amber-400 font-bold uppercase block mb-1">3. Impacto Direto no Seu Bolso</span>
+              <p class="text-[var(--muted-foreground)]">
+                A PLR Social representa uma injeção de <strong>0,5 a 1,2 salário base</strong> para as faixas salariais iniciais e operacionais (TBN, Caixas e Assistentes), servindo como mecanismo equalizador de renda interna no banco.
+              </p>
+            </div>
+            <div class="bg-[var(--content)] p-3 rounded-lg border border-[var(--border)]">
+              <span class="text-[10px] text-green-400 font-bold uppercase block mb-1">4. Proposta Típica do Min. Caputo Bastos</span>
+              <p class="text-[var(--muted-foreground)]">
+                <strong>Manutenção integral da PLR Social</strong> com antecipação de 60% da parcela em setembro/outubro e saldo residual pago após o fechamento do balanço auditado, em linha com o calendário histórico negociado.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. JORNADA E 7ª/8ª HORA -->
+        <div class="card clausula-card border-purple-500/30" data-cat="jornada">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-[var(--border)]">
+            <div class="flex items-center gap-3">
+              <span class="w-10 h-10 rounded-xl bg-purple-500/15 flex items-center justify-center text-xl">⏰</span>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="font-bold text-base text-[var(--foreground)]">Jornada Bancária de 6h e a 7ª e 8ª Hora (Função de Confiança)</h3>
+                  <span class="badge bg-amber-500/15 text-amber-400 border border-amber-500/30">Nível: 🟡 Médio</span>
+                </div>
+                <div class="text-[11px] text-[var(--muted-foreground)]">Frequência em litígios Caixa no TST: <strong>41,9% dos casos</strong></div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 text-xs">
+              <span class="text-[var(--muted-foreground)]">Risco em Julgamento Normativo:</span>
+              <span class="badge bg-red-500/15 text-red-400">🔴 Alto (Tema 1046 STF)</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mt-4 text-xs">
+            <div class="bg-[var(--content)] p-3 rounded-lg border border-[var(--border)]">
+              <span class="text-[10px] text-red-400 font-bold uppercase block mb-1">1. O Impasse da Mesa (2026)</span>
+              <p class="text-[var(--muted-foreground)]">
+                <strong>Caixa:</strong> Cláusula de quitação de horas extras pela gratificação de função (compensação global) amparada na tese do Tema 1046 do STF.<br>
+                <strong>Comando:</strong> Manutenção estrita da jornada de 6h (art. 224 CLT) para cargos técnicos e operacionais, sem renúncia tácita a passivo judicial.
+              </p>
+            </div>
+            <div class="bg-[var(--content)] p-3 rounded-lg border border-[var(--border)]">
+              <span class="text-[10px] text-blue-400 font-bold uppercase block mb-1">2. O que o TST Decide Historicamente</span>
+              <p class="text-[var(--muted-foreground)]">
+                Em sentença normativa, o TST aplica rigorosamente o <strong>Tema 1046 do STF</strong>, dando validade à compensação da gratificação de função com a 7ª e 8ª hora. Ir a julgamento de mérito sobre essa cláusula é arriscado para os empregados.
+              </p>
+            </div>
+            <div class="bg-[var(--content)] p-3 rounded-lg border border-[var(--border)]">
+              <span class="text-[10px] text-amber-400 font-bold uppercase block mb-1">3. Impacto Direto no Seu Bolso</span>
+              <p class="text-[var(--muted-foreground)]">
+                Impacta milhares de ações trabalhistas individuais em andamento sobre 7ª e 8ª hora de Assistentes, Caixas e Técnicos de Operações, podendo travar novos ajuizamentos se a redação da cláusula for endurecida.
+              </p>
+            </div>
+            <div class="bg-[var(--content)] p-3 rounded-lg border border-[var(--border)]">
+              <span class="text-[10px] text-green-400 font-bold uppercase block mb-1">4. Proposta Típica do Min. Caputo Bastos</span>
+              <p class="text-[var(--muted-foreground)]">
+                Preservação da redação protetiva do ACT anterior com trava para que a compensação ocorra apenas em caso de eficácia liberatória expressa de acordos individuais na CCP (Comissão de Conciliação Prévia).
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. DIAS PARADOS DA GREVE -->
+        <div class="card clausula-card border-amber-500/30" data-cat="protecao">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-[var(--border)]">
+            <div class="flex items-center gap-3">
+              <span class="w-10 h-10 rounded-xl bg-amber-500/15 flex items-center justify-center text-xl">🛡️</span>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="font-bold text-base text-[var(--foreground)]">Tratamento dos 15 Dias Parados de Greve</h3>
+                  <span class="badge bg-red-500/15 text-red-400 border border-red-500/30">Nível: 🔴 Crítico</span>
+                </div>
+                <div class="text-[11px] text-[var(--muted-foreground)]">Tema central em litígios pós-greve: <strong>72% dos recursos nas Turmas</strong></div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 text-xs">
+              <span class="text-[var(--muted-foreground)]">Risco em Julgamento Normativo:</span>
+              <span class="badge bg-red-500/15 text-red-400">🔴 Alto (Desconto Salarial Puro pela OJ 10)</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mt-4 text-xs">
+            <div class="bg-[var(--content)] p-3 rounded-lg border border-[var(--border)]">
+              <span class="text-[10px] text-red-400 font-bold uppercase block mb-1">1. O Impasse da Mesa (2026)</span>
+              <p class="text-[var(--muted-foreground)]">
+                <strong>Caixa:</strong> Ajuizou o dissídio e acena com desconto integral dos 15 dias parados com base na OJ 10 da SDC.<br>
+                <strong>Comando:</strong> Compensação de jornada de até 2h por dia com prazo até dezembro/2026 ou abono de parte dos dias.
+              </p>
+            </div>
+            <div class="bg-[var(--content)] p-3 rounded-lg border border-[var(--border)]">
+              <span class="text-[10px] text-blue-400 font-bold uppercase block mb-1">2. O que o TST Decide Historicamente</span>
+              <p class="text-[var(--muted-foreground)]">
+                Em sentença normativa litigiosa na SDC, o tribunal determina o <strong>desconto imediato</strong> (OJ 10 da SDC). <strong>Mas na mediação da Vice-Presidência, em mais de 90% dos acordos a Caixa aceita a compensação de horas</strong> sem corte financeiro imediato.
+              </p>
+            </div>
+            <div class="bg-[var(--content)] p-3 rounded-lg border border-[var(--border)]">
+              <span class="text-[10px] text-amber-400 font-bold uppercase block mb-1">3. Impacto Direto no Seu Bolso</span>
+              <p class="text-[var(--muted-foreground)]">
+                Um desconto puro de 15 dias representaria o corte de <strong>50% do salário do mês</strong> no próximo contracheque, além de perda proporcional no 13º salário e nas férias. A compensação de horas preserva 100% da renda.
+              </p>
+            </div>
+            <div class="bg-[var(--content)] p-3 rounded-lg border border-[var(--border)]">
+              <span class="text-[10px] text-green-400 font-bold uppercase block mb-1">4. Proposta Típica do Min. Caputo Bastos</span>
+              <p class="text-[var(--muted-foreground)]">
+                Fórmula consagrada nas mediações do TST: <strong>compensação de 100% das horas paradas</strong> no limite de até 1h a 2h diárias suplementares, com prazo elástico de até 180 dias para cumprimento, sem desconto em folha.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. VALE-ALIMENTAÇÃO E 13ª CESTA -->
+        <div class="card clausula-card border-teal-500/30" data-cat="bolso">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-[var(--border)]">
+            <div class="flex items-center gap-3">
+              <span class="w-10 h-10 rounded-xl bg-teal-500/15 flex items-center justify-center text-xl">🍽️</span>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="font-bold text-base text-[var(--foreground)]">Auxílio-Alimentação, Cesta Refeição e 13ª Cesta</h3>
+                  <span class="badge bg-green-500/15 text-green-400 border border-green-500/30">Nível: 🟢 Baixo Risco</span>
+                </div>
+                <div class="text-[11px] text-[var(--muted-foreground)]">Frequência em litígios Caixa no TST: <strong>25,6% dos casos</strong></div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 text-xs">
+              <span class="text-[var(--muted-foreground)]">Risco em Julgamento Normativo:</span>
+              <span class="badge bg-green-500/15 text-green-400">🟢 Baixo (Reposição do INPC é Garantida)</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mt-4 text-xs">
+            <div class="bg-[var(--content)] p-3 rounded-lg border border-[var(--border)]">
+              <span class="text-[10px] text-red-400 font-bold uppercase block mb-1">1. O Impasse da Mesa (2026)</span>
+              <p class="text-[var(--muted-foreground)]">
+                <strong>Caixa:</strong> Reajuste inflacionário estrito da CCT Fenaban.<br>
+                <strong>Comando:</strong> Reposição da inflação + ganho real de 1,5% e garantia de fornecimento durante licença-maternidade e auxílio-doença por até 180 dias.
+              </p>
+            </div>
+            <div class="bg-[var(--content)] p-3 rounded-lg border border-[var(--border)]">
+              <span class="text-[10px] text-blue-400 font-bold uppercase block mb-1">2. O que o TST Decide Historicamente</span>
+              <p class="text-[var(--muted-foreground)]">
+                A SDC garante a reposição integral do INPC para benefícios alimentares pré-existentes, aplicando precedentes normativos para proteger o poder de compra dos tíquetes.
+              </p>
+            </div>
+            <div class="bg-[var(--content)] p-3 rounded-lg border border-[var(--border)]">
+              <span class="text-[10px] text-amber-400 font-bold uppercase block mb-1">3. Impacto Direto no Seu Bolso</span>
+              <p class="text-[var(--muted-foreground)]">
+                O pacote alimentação/refeição da Caixa supera R$ 1.900/mês. Qualquer perda inflacionária ou suspensão durante afastamento previdenciário atinge diretamente a cesta familiar do empregado.
+              </p>
+            </div>
+            <div class="bg-[var(--content)] p-3 rounded-lg border border-[var(--border)]">
+              <span class="text-[10px] text-green-400 font-bold uppercase block mb-1">4. Proposta Típica do Min. Caputo Bastos</span>
+              <p class="text-[var(--muted-foreground)]">
+                Acompanhamento integral do índice acordado na CCT Fenaban (INPC + aumento real acordado) com manutenção das cláusulas sociais históricas de fornecimento nos afastamentos legais.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. TELETRABALHO E CONDIÇÕES ERGONÔMICAS -->
+        <div class="card clausula-card border-indigo-500/30" data-cat="jornada">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-[var(--border)]">
+            <div class="flex items-center gap-3">
+              <span class="w-10 h-10 rounded-xl bg-indigo-500/15 flex items-center justify-center text-xl">💻</span>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="font-bold text-base text-[var(--foreground)]">Teletrabalho, Trabalho Híbrido e Ajuda de Custo</h3>
+                  <span class="badge bg-amber-500/15 text-amber-400 border border-amber-500/30">Nível: 🟡 Médio</span>
+                </div>
+                <div class="text-[11px] text-[var(--muted-foreground)]">Tema emergente em expansão na base bancária</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 text-xs">
+              <span class="text-[var(--muted-foreground)]">Risco em Julgamento Normativo:</span>
+              <span class="badge bg-red-500/15 text-red-400">🔴 Altíssimo (Criação Judicial Proibida)</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mt-4 text-xs">
+            <div class="bg-[var(--content)] p-3 rounded-lg border border-[var(--border)]">
+              <span class="text-[10px] text-red-400 font-bold uppercase block mb-1">1. O Impasse da Mesa (2026)</span>
+              <p class="text-[var(--muted-foreground)]">
+                <strong>Caixa:</strong> Retorno presencial mandatório gradual e limitação de vagas híbridas discricionárias da gestão.<br>
+                <strong>Comando:</strong> Prioridade de teletrabalho para empregados PCD, pais de dependentes com deficiência e ajuda de custo para despesas de conectividade.
+              </p>
+            </div>
+            <div class="bg-[var(--content)] p-3 rounded-lg border border-[var(--border)]">
+              <span class="text-[10px] text-blue-400 font-bold uppercase block mb-1">2. O que o TST Decide Historicamente</span>
+              <p class="text-[var(--muted-foreground)]">
+                <strong>Atenção máxima:</strong> Em sentença normativa, o TST <strong>não pode criar regras de teletrabalho</strong> nem impor ajuda de custo sem concordância expressa do empregador (entende ser poder de gestão da empresa). Essa cláusula <strong>só existe se for por acordo</strong>.
+              </p>
+            </div>
+            <div class="bg-[var(--content)] p-3 rounded-lg border border-[var(--border)]">
+              <span class="text-[10px] text-amber-400 font-bold uppercase block mb-1">3. Impacto Direto no Seu Bolso</span>
+              <p class="text-[var(--muted-foreground)]">
+                Custos de deslocamento, alimentação e logística familiar para milhares de bancários das áreas administrativas e de tecnologia (TI) que atuavam em regime remoto/híbrido.
+              </p>
+            </div>
+            <div class="bg-[var(--content)] p-3 rounded-lg border border-[var(--border)]">
+              <span class="text-[10px] text-green-400 font-bold uppercase block mb-1">4. Proposta Típica do Min. Caputo Bastos</span>
+              <p class="text-[var(--muted-foreground)]">
+                Compromisso da Caixa de manter prioridade no modelo híbrido para empregados com filhos ou dependentes com deficiência comprovada, e abertura de diálogo setorial específico para as equipes de TI.
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Comparativo Sintético: O Cenário das 3 Vias -->
+      <div class="card">
+        <h3 class="text-sm font-semibold mb-2">📊 Comparativo das 3 Vias: O Que Esperar de Cada Caminho</h3>
+        <p class="text-xs text-[var(--muted-foreground)] mb-4">Entenda a diferença entre o que a Caixa propôs, o que o Sindicato quer e o meio-termo provável do TST.</p>
+        
+        <div class="overflow-x-auto text-xs">
+          <table class="w-full">
+            <thead>
+              <tr class="border-b border-[var(--border)] bg-[var(--content)]">
+                <th class="text-left p-3 font-semibold">Cláusula</th>
+                <th class="text-left p-3 font-semibold text-red-400">Proposta da Caixa (17/09)</th>
+                <th class="text-left p-3 font-semibold text-blue-400">Reivindicação do Sindicato</th>
+                <th class="text-left p-3 font-semibold text-green-400">Meio-Termo Provável na Mediação TST</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[var(--border)]">
+              <tr>
+                <td class="p-3 font-bold">Saúde Caixa</td>
+                <td class="p-3 text-[var(--muted-foreground)]">Manter teto de 6,5% e travas aos admitidos pós-2018</td>
+                <td class="p-3 text-[var(--muted-foreground)]">Fim do teto de 6,5% e plano integral para todos</td>
+                <td class="p-3 text-[var(--foreground)] font-medium">Prorrogar regras atuais sem reajuste de coparticipação e mesa temática paritária</td>
+              </tr>
+              <tr>
+                <td class="p-3 font-bold">Dias Parados da Greve</td>
+                <td class="p-3 text-[var(--muted-foreground)]">Ameaça de desconto imediato em folha (OJ 10 SDC)</td>
+                <td class="p-3 text-[var(--muted-foreground)]">Abono integral dos 15 dias parados</td>
+                <td class="p-3 text-[var(--foreground)] font-medium">Compensação de 100% das horas (até 2h/dia) com prazo de até 180 dias sem desconto</td>
+              </tr>
+              <tr>
+                <td class="p-3 font-bold">PLR Social</td>
+                <td class="p-3 text-[var(--muted-foreground)]">Regra Fenaban básica com condicionantes de metas</td>
+                <td class="p-3 text-[var(--muted-foreground)]">4% do lucro líquido distribuído linearmente</td>
+                <td class="p-3 text-[var(--foreground)] font-medium">Manutenção da PLR Social histórica com antecipação em outubro</td>
+              </tr>
+              <tr>
+                <td class="p-3 font-bold">Reajuste & Tíquetes</td>
+                <td class="p-3 text-[var(--muted-foreground)]">Reposição estrita do INPC acumulado</td>
+                <td class="p-3 text-[var(--muted-foreground)]">INPC + 1,5% de aumento real</td>
+                <td class="p-3 text-[var(--foreground)] font-medium">Alinhamento com o índice geral fechado pelos bancos privados (Fenaban)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ==================== ABA 2: RADAR DO DISSÍDIO 2026 ==================== -->
+    <div id="panel-radar" class="hidden fade-in space-y-6">
+
+      <!-- Alerta Processual em Tempo Real -->
+      <div class="card glow-amber border-amber-500/30 bg-gradient-to-r from-amber-500/5 via-transparent to-transparent">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="badge bg-amber-500 text-white">AJUIZAMENTO CONFIRMADO</span>
+              <span class="text-xs text-[var(--muted-foreground)]">Tribunal Superior do Trabalho • 24/09/2026</span>
+            </div>
+            <h2 class="text-lg font-bold">A Caixa ajuizou Dissídio Coletivo de Greve após 15 dias de paralisação</h2>
+            <p class="text-xs text-[var(--muted-foreground)] mt-1 max-w-3xl">
+              Após as assembleias de 21/09 rejeitarem a proposta da empresa, a Caixa formalizou o pedido no TST. O processo encontra-se na <strong>Vice-Presidência</strong> para abertura de rodada de conciliação com o Comando Nacional dos Bancários / Contraf-CUT.
+            </p>
+          </div>
+          <div class="flex items-center gap-3 bg-[var(--card)] p-3 rounded-xl border border-[var(--border)] flex-shrink-0">
+            <div class="text-center px-2">
+              <div class="text-xl font-bold text-blue-500">Caixa</div>
+              <div class="text-[10px] text-[var(--muted-foreground)] uppercase">Suscitante (Autora)</div>
+            </div>
+            <div class="text-xs text-[var(--muted-foreground)] font-bold">VS</div>
+            <div class="text-center px-2">
+              <div class="text-xl font-bold text-amber-500">Contraf-CUT</div>
+              <div class="text-[10px] text-[var(--muted-foreground)] uppercase">Suscitada (Trabalhadores)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pedido Cautelar Crucial da Caixa (Ultratividade) -->
+      <div class="card glow-blue border-blue-500/30">
+        <div class="flex items-start gap-4">
+          <div class="w-12 h-12 rounded-xl bg-blue-500/15 flex items-center justify-center text-2xl flex-shrink-0">
+            🛡️
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-1">
+              <h3 class="text-base font-bold">O Pedido Cautelar da Caixa: Prorrogação dos Benefícios (Ultratividade)</h3>
+              <span class="badge bg-blue-500/15 text-blue-400">Proteção Provisória</span>
+            </div>
+            <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+              No protocolo de hoje, a Caixa informou aos empregados que solicitou ao TST a <strong>"concessão de medida excepcional e temporária da prorrogação dos benefícios atualmente disponibilizados aos empregados, nas mesmas condições vigentes até 31/08/2026, enquanto durar o julgamento da matéria."</strong>
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4 pt-3 border-t border-[var(--border)] text-xs">
+              <div class="bg-[var(--content)] p-3 rounded-lg border border-[var(--border)]">
+                <span class="font-bold text-[var(--foreground)] block mb-1">🏥 Saúde Caixa Assegurado</span>
+                <span class="text-[var(--muted-foreground)]">Evita o vácuo jurídico e garante que atendimentos médicos e convênios continuem vigentes durante o dissídio.</span>
+              </div>
+              <div class="bg-[var(--content)] p-3 rounded-lg border border-[var(--border)]">
+                <span class="font-bold text-[var(--foreground)] block mb-1">🍽️ Vale-Alimentação & Benefícios</span>
+                <span class="text-[var(--muted-foreground)]">Mantém a vigência formal dos valores e concessões previstos no ACT anterior enquanto há mediação.</span>
+              </div>
+              <div class="bg-[var(--content)] p-3 rounded-lg border border-[var(--border)]">
+                <span class="font-bold text-[var(--foreground)] block mb-1">💬 "Diálogo Não Encerrado"</span>
+                <span class="text-[var(--muted-foreground)]">A própria empresa declarou no pedido que a medida visa evitar prejuízos e manter a negociação aberta.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Linha do Tempo Visual do Conflito Atual -->
+      <div class="card">
+        <h3 class="text-sm font-semibold mb-4">📍 Linha do Tempo da Campanha Salarial Caixa 2026</h3>
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-3 relative text-xs">
+          
+          <div class="bg-[var(--content)] p-3 rounded-xl border border-[var(--border)]">
+            <div class="text-[10px] text-blue-400 font-bold uppercase mb-1">10/Setembro</div>
+            <div class="font-semibold text-[var(--foreground)]">Deflagração da Greve</div>
+            <p class="text-[11px] text-[var(--muted-foreground)] mt-1">Início da paralisação nacional após impasse nas rodadas de negociação prévia.</p>
+          </div>
+
+          <div class="bg-[var(--content)] p-3 rounded-xl border border-[var(--border)]">
+            <div class="text-[10px] text-blue-400 font-bold uppercase mb-1">17/Setembro</div>
+            <div class="font-semibold text-[var(--foreground)]">Proposta da Caixa</div>
+            <p class="text-[11px] text-[var(--muted-foreground)] mt-1">Apresentação da proposta de renovação do ACT e regras para o Saúde Caixa.</p>
+          </div>
+
+          <div class="bg-[var(--content)] p-3 rounded-xl border border-[var(--border)]">
+            <div class="text-[10px] text-red-400 font-bold uppercase mb-1">21/Setembro</div>
+            <div class="font-semibold text-[var(--foreground)]">Rejeição em Assembleia</div>
+            <p class="text-[11px] text-[var(--muted-foreground)] mt-1">Maioria dos estados rejeita a proposta; greve é mantida e sindicato pede retorno à mesa.</p>
+          </div>
+
+          <div class="bg-[var(--content)] p-3 rounded-xl border border-amber-500/50 glow-amber">
+            <div class="text-[10px] text-amber-400 font-bold uppercase mb-1">24/Setembro (Hoje)</div>
+            <div class="font-semibold text-[var(--foreground)]">Ajuizamento do Dissídio</div>
+            <p class="text-[11px] text-[var(--muted-foreground)] mt-1">Caixa protocola dissídio no TST com pedido cautelar de prorrogação do ACT anterior.</p>
+          </div>
+
+          <div class="bg-[var(--content)] p-3 rounded-xl border border-dashed border-[var(--border)] opacity-80">
+            <div class="text-[10px] text-[var(--muted-foreground)] font-bold uppercase mb-1">Próximos Dias</div>
+            <div class="font-semibold text-[var(--foreground)]">Mediação na Vice-Presidência</div>
+            <p class="text-[11px] text-[var(--muted-foreground)] mt-1">Min. Caputo Bastos convocará banco e Contraf para audiência de tentativa de acordo.</p>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ==================== ABA 3: O MEDIADOR (CAPUTO BASTOS) ==================== -->
+    <div id="panel-mediador" class="hidden fade-in space-y-6">
+
+      <div class="card border-purple-500/30 bg-purple-500/5">
+        <div class="flex items-start gap-3">
+          <span class="text-2xl">💡</span>
+          <div>
+            <h3 class="text-sm font-bold text-purple-400">Entenda a regra regimental: O processo NÃO foi sorteado para a SDC ainda</h3>
+            <p class="text-xs text-[var(--muted-foreground)] mt-1 leading-relaxed">
+              No TST, dissídios coletivos de empresas públicas <strong>não vão direto para sorteio de relator de mérito</strong>. Pelo Regimento Interno (art. 42, III c/c Ato GVP nº 01/2019), o processo é encaminhado compulsoriamente à <strong>Vice-Presidência do TST</strong>. O Ministro Caputo Bastos atua como <strong>mediador institucional</strong> para evitar que o conflito vire sentença judicial imposta.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <div class="card lg:col-span-2">
+          <div class="flex items-start gap-4 mb-4">
+            <div class="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center text-3xl flex-shrink-0">
+              👨‍⚖️
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 class="text-base font-bold">Min. Guilherme Augusto Caputo Bastos</h3>
+                <span class="badge bg-blue-500/15 text-blue-400">Vice-Presidente do TST</span>
+              </div>
+              <p class="text-xs text-[var(--muted-foreground)] mt-0.5">Responsável oficial pela condução da mediação pré-processual</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs mb-4">
+            <div class="bg-[var(--content)] p-3 rounded-lg border border-[var(--border)]">
+              <span class="text-[10px] text-[var(--muted-foreground)] uppercase block">Estilo de Atuação</span>
+              <strong class="text-[var(--foreground)] text-xs">Foco Pragmático em Acordo</strong>
+              <p class="text-[11px] text-[var(--muted-foreground)] mt-1">Estimula as partes a cederem em pontos periféricos para salvar o acordo central.</p>
+            </div>
+            <div class="bg-[var(--content)] p-3 rounded-lg border border-[var(--border)]">
+              <span class="text-[10px] text-[var(--muted-foreground)] uppercase block">Histórico Recente</span>
+              <strong class="text-[var(--foreground)] text-xs">Acordos em Estatais</strong>
+              <p class="text-[11px] text-[var(--muted-foreground)] mt-1">Conduziu a homologação de acordos complexos da Casa da Moeda, Correios e Petrobras em 2025/2026.</p>
+            </div>
+            <div class="bg-[var(--content)] p-3 rounded-lg border border-[var(--border)]">
+              <span class="text-[10px] text-[var(--muted-foreground)] uppercase block">Atividade Essencial</span>
+              <strong class="text-[var(--foreground)] text-xs">Rigor em Contingente</strong>
+              <p class="text-[11px] text-[var(--muted-foreground)] mt-1">Exige funcionamento mínimo de agências bancárias (60% a 70%) para manter a mesa aberta.</p>
+            </div>
+          </div>
+
+          <h4 class="text-xs font-bold uppercase tracking-wider text-[var(--muted-foreground)] mb-2">Como funcionará a rodada de mediação:</h4>
+          <ol class="space-y-2 text-xs text-[var(--muted-foreground)] list-decimal list-inside">
+            <li><strong class="text-[var(--foreground)]">Audiência Presencial no TST:</strong> As bancadas da Caixa e do Comando Nacional são convocadas para Brasília.</li>
+            <li><strong class="text-[var(--foreground)]">Reuniões Unilaterais:</strong> O mediador ouve separadamente os impasses de cada lado (especialmente Saúde Caixa e reajuste).</li>
+            <li><strong class="text-[var(--foreground)]">Proposta do Tribunal:</strong> Se não houver consenso direto, o Min. Caputo Bastos formulará uma proposta intermediária equilibrando as perdas.</li>
+            <li><strong class="text-[var(--foreground)]">Votação em Assembleia:</strong> Se as partes acatarem a proposta do Tribunal, ela vai a voto dos bancários. Se aprovada, o dissídio é extinto com acordo homologado.</li>
+          </ol>
+        </div>
+
+        <div class="card space-y-4">
+          <h3 class="text-sm font-semibold">Taxa Histórica da Vice-Presidência</h3>
+          <div class="bg-[var(--content)] p-4 rounded-xl text-center border border-[var(--border)]">
+            <div class="text-3xl font-extrabold text-green-500">~78%</div>
+            <div class="text-xs font-semibold mt-1">Índice de Acordo em Mediação Bancária</div>
+            <p class="text-[11px] text-[var(--muted-foreground)] mt-1">A ampla maioria dos dissídios coletivos bancários se encerra na mesa conciliatória sem necessidade de julgamento pela SDC.</p>
+          </div>
+          <div class="text-xs text-[var(--muted-foreground)] space-y-2">
+            <div class="flex items-center justify-between py-1 border-b border-[var(--border)]">
+              <span>Média de dias para acordo:</span>
+              <strong class="text-[var(--foreground)]">7 a 20 dias</strong>
+            </div>
+            <div class="flex items-center justify-between py-1 border-b border-[var(--border)]">
+              <span>Tratamento usual dos dias parados:</span>
+              <strong class="text-green-500">Compensação de jornada</strong>
+            </div>
+            <div class="flex items-center justify-between py-1">
+              <span>Risco de perda abrupta de cláusulas:</span>
+              <strong class="text-blue-400">Baixo em mediação</strong>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ==================== ABA 4: STF, SEST & RISCOS ==================== -->
+    <div id="panel-stf" class="hidden fade-in space-y-6">
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <div class="card glow-amber border-amber-500/20">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-xl">🏛️</span>
+            <h3 class="text-sm font-bold">O Limite Oculto: SEST / DEST (100% dos Casos)</h3>
+          </div>
+          <p class="text-xs text-[var(--muted-foreground)] leading-relaxed mb-3">
+            Por ser empresa pública federal 100% dependente das diretrizes do Ministério da Gestão e Inovação (MGI), a Caixa <strong>não tem autonomia irrestrita</strong> para conceder aumentos ou custear o plano de saúde acima das portarias da SEST (Secretaria de Coordenação e Governança das Empresas Estatais).
+          </p>
+          <div class="bg-[var(--content)] p-3 rounded-lg border border-[var(--border)] text-xs text-[var(--muted-foreground)]">
+            <strong class="text-amber-400 block mb-1">Por que a Caixa foi ao TST?</strong>
+            O dissídio coletivo serve também para a Caixa ter um respaldo institucional ou uma proposta formulada pelo próprio Tribunal Superior do Trabalho, permitindo flexibilizar as travas fiscais impostas pela SEST sem incorrer em responsabilização de seus gestores.
+          </div>
+        </div>
+
+        <div class="card glow-blue border-blue-500/20">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-xl">⚖️</span>
+            <h3 class="text-sm font-bold">Os Dois Precedentes Vinculantes do STF</h3>
+          </div>
+          <div class="space-y-3 text-xs">
+            <div class="bg-[var(--content)] p-3 rounded-lg border border-[var(--border)]">
+              <strong class="text-blue-400 block mb-0.5">Tema 435 do STF (RE 693.456) — Desconto na Greve</strong>
+              <p class="text-[var(--muted-foreground)]">
+                O STF fixou a tese de que a greve suspende o contrato, autorizando o desconto salarial. <strong>Contudo</strong>, o STF expressamente autorizou a <em>compensação de horas</em> quando houver acordo entre as partes. Na Caixa, a compensação é a regra de 90% dos acordos.
+              </p>
+            </div>
+            <div class="bg-[var(--content)] p-3 rounded-lg border border-[var(--border)]">
+              <strong class="text-purple-400 block mb-0.5">Tema 1046 do STF (ARE 1.121.633) — Prevalência do Negociado</strong>
+              <p class="text-[var(--muted-foreground)]">
+                São válidos acordos que pactuam condições específicas mesmo que limitem direitos de lei, desde que não violem direitos absolutamente indisponíveis. Dá segurança jurídica total ao ACT que for assinado.
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="card">
+        <h3 class="text-sm font-semibold mb-3">🛡️ Proteções Individuais do Grevista Durante o Conflito</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+          
+          <div class="bg-[var(--content)] p-4 rounded-xl border border-[var(--border)]">
+            <div class="flex items-center gap-2 mb-2 font-bold text-[var(--foreground)]">
+              <span>🤰</span> Estabilidade Gestante (20,9%)
+            </div>
+            <p class="text-[var(--muted-foreground)]">
+              A adesão à greve não prejudica a estabilidade provisória da gestante. O TST anula sumariamente qualquer penalidade imposta a empregadas grávidas durante o movimento.
+            </p>
+          </div>
+
+          <div class="bg-[var(--content)] p-4 rounded-xl border border-[var(--border)]">
+            <div class="flex items-center gap-2 mb-2 font-bold text-[var(--foreground)]">
+              <span>⚡</span> Multas Astreintes (45,7%)
+            </div>
+            <p class="text-[var(--muted-foreground)]">
+              Em caso de bloqueio total de agências ou descumprimento do contingente mínimo de 60%, a Caixa costuma pleitear multas diárias de R$ 50 mil a R$ 100 mil contra os sindicatos.
+            </p>
+          </div>
+
+          <div class="bg-[var(--content)] p-4 rounded-xl border border-[var(--border)]">
+            <div class="flex items-center gap-2 mb-2 font-bold text-[var(--foreground)]">
+              <span>🤝</span> Represálias e Assédio (11,6%)
+            </div>
+            <p class="text-[var(--muted-foreground)]">
+              Remoções compulsórias, perda de função de confiança ou corte seletivo de benefícios contra participantes da greve configuram ato antissindical e geram indenização.
+            </p>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ==================== ABA 5: SE A MEDIAÇÃO FRACASSAR (SDC) ==================== -->
+    <div id="panel-sdc" class="hidden fade-in space-y-6">
+
+      <div class="card border-red-500/20 bg-red-500/5">
+        <div class="flex items-start gap-3">
+          <span class="text-2xl">⚠️</span>
+          <div>
+            <h3 class="text-sm font-bold text-red-400">O que acontece se a mesa do Min. Caputo Bastos não produzir acordo?</h3>
+            <p class="text-xs text-[var(--muted-foreground)] mt-1 leading-relaxed">
+              Caso a mediação seja formalmente encerrada sem consenso e as assembleias rejeitem a Proposta do Tribunal, o processo <strong>finalmente sai da Vice-Presidência</strong> e é sorteado eletronicamente para um dos ministros eleitos da SDC para virar <strong>Sentença Normativa</strong>.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="text-sm font-semibold mb-1">🎰 Quem Pode Ser o Relator de Mérito?</h3>
+        <p class="text-xs text-[var(--muted-foreground)] mb-4">
+          A SDC tem 9 ministros. Excluídos os membros natos (Presidente, Vice e Corregedor), o sorteio ocorre entre os ministros da Seção:
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+          
+          <div class="bg-[var(--content)] p-4 rounded-xl border border-green-500/30">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-bold text-sm text-[var(--foreground)]">Min. Mauricio Godinho Delgado</span>
+              <span class="badge bg-green-500/15 text-green-400">Mais Frequente na CEF (28%)</span>
+            </div>
+            <p class="text-[var(--muted-foreground)] mb-2">
+              <strong>Perfil:</strong> Social-trabalhista. Favorece a compensação de dias parados, preserva cláusulas históricas dos ACTs e mitiga a exigência de comum acordo.
+            </p>
+            <div class="text-[11px] text-green-400 font-semibold">Cenário se sorteado: Favorável à manutenção das conquistas.</div>
+          </div>
+
+          <div class="bg-[var(--content)] p-4 rounded-xl border border-red-500/30">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-bold text-sm text-[var(--foreground)]">Min. Ives Gandra Martins Filho</span>
+              <span class="badge bg-red-500/15 text-red-400">18% dos Casos CEF</span>
+            </div>
+            <p class="text-[var(--muted-foreground)] mb-2">
+              <strong>Perfil:</strong> Legalista estrito / Pró-sustentabilidade fiscal. Aplica de forma rigorosa a OJ 10 da SDC (desconto imediato), teto da SEST e alta exigência de contingente.
+            </p>
+            <div class="text-[11px] text-red-400 font-semibold">Cenário se sorteado: Risco de corte de cláusulas e desconto salarial.</div>
+          </div>
+
+          <div class="bg-[var(--content)] p-4 rounded-xl border border-[var(--border)]">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-bold text-sm text-[var(--foreground)]">Min. Kátia Magalhães Arruda</span>
+              <span class="badge bg-blue-500/15 text-blue-400">16% dos Casos CEF</span>
+            </div>
+            <p class="text-[var(--muted-foreground)] mb-2">
+              <strong>Perfil:</strong> Garantista. Foco na liberdade sindical e proteção de condições de saúde e segurança do trabalhador.
+            </p>
+            <div class="text-[11px] text-blue-400 font-semibold">Cenário se sorteada: Favorável à categoria bancária.</div>
+          </div>
+
+          <div class="bg-[var(--content)] p-4 rounded-xl border border-[var(--border)]">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-bold text-sm text-[var(--foreground)]">Min. Alexandre Agra Belmonte</span>
+              <span class="badge bg-amber-500/15 text-amber-400">Equilibrado</span>
+            </div>
+            <p class="text-[var(--muted-foreground)] mb-2">
+              <strong>Perfil:</strong> Moderado. Busca harmonizar a continuidade do serviço público essencial com a dignidade da categoria.
+            </p>
+            <div class="text-[11px] text-amber-400 font-semibold">Cenário se sorteado: Proposta de meio-termo ponderada.</div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="text-sm font-semibold mb-3">❓ Dúvidas Rápidas do Empregado sobre a SDC</h3>
+        <div class="space-y-2 text-xs">
+          
+          <details class="faq-item bg-[var(--content)] border border-[var(--border)] rounded-lg">
+            <summary class="px-4 py-3 font-semibold">O TST pode dar reajuste salarial acima da inflação?</summary>
+            <div class="px-4 pb-3 pt-2 text-[var(--muted-foreground)] border-t border-[var(--border)]">
+              Não. O TST segue jurisprudência pacífica de que em sentença normativa não se concede aumento real salarial, limitando-se no máximo à reposição do INPC integral, e desde que haja previsão orçamentária.
+            </div>
+          </details>
+
+          <details class="faq-item bg-[var(--content)] border border-[var(--border)] rounded-lg">
+            <summary class="px-4 py-3 font-semibold">Por que a Contraf e a Caixa preferem fechar acordo na mediação?</summary>
+            <div class="px-4 pb-3 pt-2 text-[var(--muted-foreground)] border-t border-[var(--border)]">
+              Porque na sentença normativa o tribunal corta cláusulas que dependem exclusivamente de acordo entre as partes (como abono de dias, regras especiais de PLR e folgas assiduidade). No acordo, as partes mantêm controle sobre o que é assinado.
+            </div>
+          </details>
+
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer class="border-t border-[var(--border)] px-6 py-4 mt-8 bg-[var(--card)] text-xs text-[var(--muted-foreground)]">
+    <div class="max-w-[1300px] mx-auto flex flex-col md:flex-row justify-between items-center gap-2">
+      <span>Painel Tático do Empregado Caixa — Desenvolvido com base em 179 acórdãos reais do TST (2016–2026)</span>
+      <span>Fonte: jurisprudencia-backend.tst.jus.br • Atualizado em 24/09/2026</span>
+    </div>
+  </footer>
+
+  <script>
+    function showTab(id) {
+      document.querySelectorAll('[id^=panel-]').forEach(p => p.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      const activePanel = document.getElementById('panel-' + id);
+      const activeBtn = document.getElementById('tab-' + id);
+      if (activePanel) activePanel.classList.remove('hidden');
+      if (activeBtn) activeBtn.classList.add('active');
+    }
+
+    function filterClausulas(cat) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      const activeBtn = document.getElementById('btn-' + cat);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      const cards = document.querySelectorAll('.clausula-card');
+      cards.forEach(card => {
+        if (cat === 'todas') {
+          card.classList.remove('hidden');
+        } else {
+          if (card.getAttribute('data-cat') === cat) {
+            card.classList.remove('hidden');
+          } else {
+            card.classList.add('hidden');
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>
