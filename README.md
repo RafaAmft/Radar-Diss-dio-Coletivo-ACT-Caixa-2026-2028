@@ -2,6 +2,8 @@
 
 > Plataforma de jurimetria, raspagem de dados e inteligência tática sobre dissídios coletivos e greves de estatais brasileiras no Tribunal Superior do Trabalho (TST), com foco especial na campanha salarial e no ACT da Caixa Econômica Federal.
 
+🌐 **Acesse o Dashboard Online:** [https://rafaamft.github.io/Radar-Diss-dio-Coletivo-ACT-Caixa-2026-2028/](https://rafaamft.github.io/Radar-Diss-dio-Coletivo-ACT-Caixa-2026-2028/)
+
 ---
 
 ## 📌 Contexto em Tempo Real (24/09/2026)
