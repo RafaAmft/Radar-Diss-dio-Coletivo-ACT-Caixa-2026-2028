@@ -1,0 +1,47 @@
+name: Publicar Dashboard no GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'index.html'
+      - 'dashboard_cef_empregado.html'
+      - 'dashboard_geral_estatais.html'
+      - 'monitoramento_diario_caixa.json'
+      - '.github/workflows/deploy_pages.yml'
+  workflow_dispatch: # Permite disparo manual
+
+# Permissões necessárias para publicar no GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Permite apenas um deploy concorrente
+concurrency:
+  group: 'pages'
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do Repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Fazer Upload do Artefato HTML
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Faz upload da raiz do repositório (onde está index.html)
+          path: '.'
+
+      - name: Deploy para GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
