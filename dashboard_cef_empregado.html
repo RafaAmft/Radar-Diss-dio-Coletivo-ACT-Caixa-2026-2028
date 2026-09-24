@@ -6,8 +6,22 @@
   <title>Dissídio ACT Caixa 2026 — Painel Tático do Empregado</title>
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
   <style>
+    :root {
+      --background: #000000;
+      --card: #0d1117;
+      --content: #161b22;
+      --border: #30363d;
+      --foreground: #f0f6fc;
+      --muted-foreground: #8b949e;
+      --primary: #3b82f6;
+      --primary-foreground: #ffffff;
+    }
+    html, body {
+      background-color: #000000 !important;
+      color: #f0f6fc !important;
+    }
     .tab-btn { transition: all 0.2s ease; cursor: pointer; }
-    .tab-btn.active { border-bottom: 3px solid var(--primary); color: var(--primary); font-weight: 600; }
+    .tab-btn.active { border-bottom: 3px solid var(--primary); color: #58a6ff; font-weight: 600; }
     .tab-btn:not(.active) { border-bottom: 3px solid transparent; opacity: 0.7; }
     .tab-btn:hover:not(.active) { opacity: 1; }
     .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
@@ -25,65 +39,74 @@
     .faq-item[open] summary::before { transform: rotate(90deg); }
     .filter-btn { transition: all 0.2s ease; cursor: pointer; }
     .filter-btn.active { background: var(--primary); color: var(--primary-foreground); font-weight: 600; border-color: var(--primary); }
+    .sticky-top-container {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background-color: #000000;
+    }
   </style>
 </head>
-<body class="bg-[var(--background)] text-[var(--foreground)] antialiased">
+<body class="bg-[#000000] text-[#f0f6fc] antialiased">
 
-  <!-- HEADER COM STATUS DO DISSÍDIO ATUAL -->
-  <header class="border-b border-[var(--border)] px-6 py-4 bg-[var(--card)] sticky top-0 z-30 shadow-sm">
-    <div class="max-w-[1300px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <div>
-        <div class="flex items-center gap-3">
-          <span class="text-2xl">🏦</span>
-          <div>
-            <div class="flex items-center gap-2">
-              <h1 class="text-lg md:text-xl font-bold tracking-tight">Dissídio Coletivo ACT Caixa 2026/2028</h1>
-              <span class="badge bg-amber-500/15 text-amber-500 border border-amber-500/30 animate-pulse">
-                ⚡ Ajuizado Hoje (24/09)
-              </span>
+  <!-- CABEÇALHO E NAVEGAÇÃO FIXOS NO TOPO COM FUNDO PRETO OPACO (Z-INDEX 100) -->
+  <div class="sticky-top-container shadow-lg border-b border-[#30363d]">
+    <!-- HEADER COM STATUS DO DISSÍDIO ATUAL -->
+    <header class="px-4 sm:px-6 py-3.5 bg-[#0d1117] border-b border-[#30363d]">
+      <div class="max-w-[1300px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div>
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">🏦</span>
+            <div>
+              <div class="flex flex-wrap items-center gap-2">
+                <h1 class="text-base sm:text-lg md:text-xl font-bold tracking-tight text-white">Dissídio ACT Caixa 2026/2028</h1>
+                <span class="badge bg-amber-500/15 text-amber-400 border border-amber-500/30 text-[10px] sm:text-xs animate-pulse">
+                  ⚡ Ajuizado Hoje (24/09)
+                </span>
+              </div>
+              <p class="text-[11px] sm:text-xs text-[#8b949e] mt-0.5">
+                Painel tático de inteligência jurídica para empregados da Caixa Econômica Federal
+              </p>
             </div>
-            <p class="text-xs text-[var(--muted-foreground)] mt-0.5">
-              Painel tático de inteligência jurídica para empregados da Caixa Econômica Federal
-            </p>
+          </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <a href="dashboard_geral_estatais.html" class="text-xs bg-[#161b22] hover:bg-[#30363d] border border-[#30363d] rounded-lg px-2.5 py-1.5 font-medium transition-colors flex items-center gap-1.5 text-white">
+            <span>📊</span>
+            <span>Visão Geral (48 Estatais)</span>
+          </a>
+          <div class="flex items-center gap-1.5 text-xs bg-[#161b22] border border-[#30363d] rounded-lg px-2.5 py-1.5 text-[#8b949e]">
+            <span class="w-2 h-2 rounded-full bg-blue-500 animate-ping"></span>
+            <span><strong>Fase:</strong> Mediação (Min. Caputo Bastos)</span>
           </div>
         </div>
       </div>
-      <div class="flex items-center gap-3">
-        <a href="dashboard_geral_estatais.html" class="text-xs bg-[var(--card)] hover:bg-[var(--content)] border border-[var(--border)] rounded-lg px-3 py-2 font-medium transition-colors flex items-center gap-1.5 text-[var(--foreground)]">
-          <span>📊</span>
-          <span>Visão Geral (48 Estatais)</span>
-        </a>
-        <div class="flex items-center gap-2 text-xs bg-[var(--content)] border border-[var(--border)] rounded-lg px-3 py-2">
-          <span class="w-2.5 h-2.5 rounded-full bg-blue-500 animate-ping"></span>
-          <span><strong>Fase:</strong> Mediação (Min. Caputo Bastos)</span>
-        </div>
-      </div>
-    </div>
-  </header>
+    </header>
 
-  <!-- NAVEGAÇÃO POR ABAS ESTRATÉGICAS -->
-  <nav class="border-b border-[var(--border)] px-6 bg-[var(--card)]">
-    <div class="max-w-[1300px] mx-auto flex gap-1 overflow-x-auto">
-      <button class="tab-btn active px-4 py-3 text-sm whitespace-nowrap" onclick="showTab('clausulas')" id="tab-clausulas">
-        🌡️ Termômetro do ACT (Cláusulas)
-      </button>
-      <button class="tab-btn px-4 py-3 text-sm whitespace-nowrap" onclick="showTab('radar')" id="tab-radar">
-        🚨 Radar do Dissídio 2026
-      </button>
-      <button class="tab-btn px-4 py-3 text-sm whitespace-nowrap" onclick="showTab('mediador')" id="tab-mediador">
-        🤝 O Mediador (Min. Caputo Bastos)
-      </button>
-      <button class="tab-btn px-4 py-3 text-sm whitespace-nowrap" onclick="showTab('stf')" id="tab-stf">
-        ⚖️ STF, SEST & Riscos
-      </button>
-      <button class="tab-btn px-4 py-3 text-sm whitespace-nowrap" onclick="showTab('sdc')" id="tab-sdc">
-        🏛️ Se a Mediação Fracassar (SDC)
-      </button>
-    </div>
-  </nav>
+    <!-- NAVEGAÇÃO POR ABAS ESTRATÉGICAS (SCROLL LATERAL SEM QUEBRAR) -->
+    <nav class="px-4 sm:px-6 bg-[#0d1117]">
+      <div class="max-w-[1300px] mx-auto flex gap-1 overflow-x-auto py-0.5">
+        <button class="tab-btn active px-3.5 py-3 text-xs sm:text-sm whitespace-nowrap" onclick="showTab('clausulas')" id="tab-clausulas">
+          🌡️ Termômetro do ACT
+        </button>
+        <button class="tab-btn px-3.5 py-3 text-xs sm:text-sm whitespace-nowrap" onclick="showTab('radar')" id="tab-radar">
+          🚨 Radar 2026
+        </button>
+        <button class="tab-btn px-3.5 py-3 text-xs sm:text-sm whitespace-nowrap" onclick="showTab('mediador')" id="tab-mediador">
+          🤝 O Mediador
+        </button>
+        <button class="tab-btn px-3.5 py-3 text-xs sm:text-sm whitespace-nowrap" onclick="showTab('stf')" id="tab-stf">
+          ⚖️ STF, SEST & Riscos
+        </button>
+        <button class="tab-btn px-3.5 py-3 text-xs sm:text-sm whitespace-nowrap" onclick="showTab('sdc')" id="tab-sdc">
+          🏛️ Se Fracassar (SDC)
+        </button>
+      </div>
+    </nav>
+  </div>
 
   <!-- ÁREA DE CONTEÚDO -->
-  <main class="max-w-[1300px] mx-auto px-6 py-6">
+  <main class="max-w-[1300px] mx-auto px-4 sm:px-6 py-4 sm:py-6 relative z-10">
 
     <!-- ==================== ABA 1: TERMÔMETRO DO ACT (ENRIQUECIDO) ==================== -->
     <div id="panel-clausulas" class="fade-in space-y-6">

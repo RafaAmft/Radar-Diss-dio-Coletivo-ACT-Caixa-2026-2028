@@ -5,12 +5,26 @@
   <title>Dissídios Coletivos de Estatais — Painel Analítico TST (2016–2026)</title>
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
   <style>
-    .tab-btn { transition: all 0.2s ease; }
-    .tab-btn.active { border-bottom: 3px solid var(--primary); color: var(--primary); font-weight: 600; }
-    .tab-btn:not(.active) { border-bottom: 3px solid transparent; }
-    .tab-btn:hover:not(.active) { opacity: 0.8; }
+    :root {
+      --background: #000000;
+      --card: #0d1117;
+      --content: #161b22;
+      --border: #30363d;
+      --foreground: #f0f6fc;
+      --muted-foreground: #8b949e;
+      --primary: #3b82f6;
+      --primary-foreground: #ffffff;
+    }
+    html, body {
+      background-color: #000000 !important;
+      color: #f0f6fc !important;
+    }
+    .tab-btn { transition: all 0.2s ease; cursor: pointer; }
+    .tab-btn.active { border-bottom: 3px solid var(--primary); color: #58a6ff; font-weight: 600; }
+    .tab-btn:not(.active) { border-bottom: 3px solid transparent; opacity: 0.7; }
+    .tab-btn:hover:not(.active) { opacity: 1; }
     .metric-card { transition: transform 0.15s ease, box-shadow 0.15s ease; }
-    .metric-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.12); }
+    .metric-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.4); }
     .bar { transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
     .bar-v { transition: height 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
     .fade-in { animation: fadeIn 0.4s ease-out; }
@@ -20,39 +34,48 @@
     .tooltip-container:hover .tooltip-text { visibility: visible; opacity: 1; }
     .ring-segment { transition: stroke-dashoffset 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
     table th { position: sticky; top: 0; z-index: 10; }
-    .scroll-shadow { box-shadow: inset 0 -8px 8px -8px rgba(0,0,0,0.08); }
+    .scroll-shadow { box-shadow: inset 0 -8px 8px -8px rgba(0,0,0,0.3); }
     .legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+    .sticky-top-container {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background-color: #000000;
+    }
   </style>
 </head>
-<body class="bg-[var(--background)] text-[var(--foreground)] antialiased">
+<body class="bg-[#000000] text-[#f0f6fc] antialiased">
 
-  <!-- HEADER -->
-  <header class="border-b border-[var(--border)] px-6 py-4">
-    <div class="max-w-[1400px] mx-auto flex items-center justify-between">
-      <div>
-        <h1 class="text-2xl font-bold tracking-tight">⚖️ Dissídios Coletivos de Estatais Brasileiras</h1>
-        <p class="text-sm text-[var(--muted-foreground)] mt-1">Painel analítico — TST / SDC e 8 Turmas — 24/09/2016 a 24/09/2026</p>
+  <!-- CABEÇALHO E NAVEGAÇÃO FIXOS NO TOPO (Z-INDEX 100) -->
+  <div class="sticky-top-container shadow-lg border-b border-[#30363d]">
+    <!-- HEADER -->
+    <header class="px-4 sm:px-6 py-3.5 bg-[#0d1117] border-b border-[#30363d]">
+      <div class="max-w-[1400px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div>
+          <h1 class="text-lg sm:text-xl md:text-2xl font-bold tracking-tight text-white">⚖️ Dissídios Coletivos de Estatais Brasileiras</h1>
+          <p class="text-[11px] sm:text-xs text-[#8b949e] mt-0.5">Painel analítico — TST / SDC e 8 Turmas — 24/09/2016 a 24/09/2026</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <a href="index.html" class="text-xs bg-[#161b22] hover:bg-[#30363d] border border-[#30363d] rounded-lg px-2.5 py-1.5 font-medium transition-colors flex items-center gap-1.5 text-white">
+            <span>🏦</span>
+            <span>Radar Caixa 2026</span>
+          </a>
+          <span class="text-[10px] sm:text-xs text-[#8b949e] bg-[#161b22] border border-[#30363d] rounded-lg px-2.5 py-1.5 truncate">Fonte: TST API</span>
+        </div>
       </div>
-      <div class="flex items-center gap-3">
-        <a href="index.html" class="text-xs bg-[var(--card)] hover:bg-[var(--content)] border border-[var(--border)] rounded-lg px-3 py-2 font-medium transition-colors flex items-center gap-1.5 text-[var(--foreground)]">
-          <span>🏦</span>
-          <span>Radar Caixa 2026</span>
-        </a>
-        <span class="text-xs text-[var(--muted-foreground)] bg-[var(--content)] border border-[var(--border)] rounded-full px-3 py-1">Fonte: jurisprudencia-backend.tst.jus.br</span>
-      </div>
-    </div>
-  </header>
+    </header>
 
-  <!-- NAVIGATION TABS -->
-  <nav class="border-b border-[var(--border)] px-6 bg-[var(--card)]">
-    <div class="max-w-[1400px] mx-auto flex gap-1">
-      <button class="tab-btn active px-5 py-3 text-sm" onclick="showTab('overview')" id="tab-overview">Visão Geral</button>
-      <button class="tab-btn px-5 py-3 text-sm" onclick="showTab('sdc')" id="tab-sdc">SDC — Ministros Relatores</button>
-      <button class="tab-btn px-5 py-3 text-sm" onclick="showTab('turmas')" id="tab-turmas">8 Turmas do TST</button>
-      <button class="tab-btn px-5 py-3 text-sm" onclick="showTab('processos')" id="tab-processos">Base de Processos</button>
-      <button class="tab-btn px-5 py-3 text-sm" onclick="showTab('entidades')" id="tab-entidades">Estatais</button>
-    </div>
-  </nav>
+    <!-- NAVIGATION TABS -->
+    <nav class="px-4 sm:px-6 bg-[#0d1117]">
+      <div class="max-w-[1400px] mx-auto flex gap-1 overflow-x-auto py-0.5">
+        <button class="tab-btn active px-3.5 py-3 text-xs sm:text-sm whitespace-nowrap" onclick="showTab('overview')" id="tab-overview">Visão Geral</button>
+        <button class="tab-btn px-3.5 py-3 text-xs sm:text-sm whitespace-nowrap" onclick="showTab('sdc')" id="tab-sdc">SDC — Ministros</button>
+        <button class="tab-btn px-3.5 py-3 text-xs sm:text-sm whitespace-nowrap" onclick="showTab('turmas')" id="tab-turmas">8 Turmas</button>
+        <button class="tab-btn px-3.5 py-3 text-xs sm:text-sm whitespace-nowrap" onclick="showTab('processos')" id="tab-processos">Base de Casos</button>
+        <button class="tab-btn px-3.5 py-3 text-xs sm:text-sm whitespace-nowrap" onclick="showTab('entidades')" id="tab-entidades">Estatais</button>
+      </div>
+    </nav>
+  </div>
 
   <!-- CONTENT -->
   <main class="max-w-[1400px] mx-auto px-6 py-6">
