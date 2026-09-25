@@ -306,12 +306,16 @@ html_template = f"""<!DOCTYPE html>
     function toggleEmenta(id) {{
       const el = document.getElementById('ementa-' + id);
       const btn = document.getElementById('btn-ementa-' + id);
+      const d = DECISOES[id];
+      const isEmenta = d && d.docType && d.docType.includes('Ementa');
+      const label = isEmenta ? 'Ementa do Acórdão' : 'Teor do Despacho/Decisão';
+      
       if (el.classList.contains('hidden')) {{
         el.classList.remove('hidden');
-        btn.innerText = '🔼 Ocultar Detalhes da Ementa';
+        btn.innerText = '🔼 Ocultar ' + label;
       }} else {{
         el.classList.add('hidden');
-        btn.innerText = '🔽 Ver Ementa e Fundamentação';
+        btn.innerText = (isEmenta ? '📜 Ver ' : '📑 Ver ') + label;
       }}
     }}
 
@@ -323,7 +327,7 @@ html_template = f"""<!DOCTYPE html>
 
       const filtered = DECISOES.filter(d => {{
         // Busca textual
-        const textToSearch = (d.cnj + ' ' + d.numFormatado + ' ' + d.relator + ' ' + d.partesContrarias + ' ' + d.temas.join(' ') + ' ' + d.trechoDestaque + ' ' + d.resumoImpacto).toLowerCase();
+        const textToSearch = (d.cnj + ' ' + d.numFormatado + ' ' + d.relator + ' ' + d.partesContrarias + ' ' + d.temas.join(' ') + ' ' + d.conteudoLimpo + ' ' + d.resumoImpacto).toLowerCase();
         if (search && !textToSearch.includes(search)) return false;
 
         // Filtro por relator
@@ -355,6 +359,8 @@ html_template = f"""<!DOCTYPE html>
       filtered.forEach((d, idx) => {{
         const isFlagship = d.is_flagship;
         const borderGlow = isFlagship ? 'border-red-500/50 glow-red' : 'border-[var(--border)]';
+        const isEmenta = d.docType && d.docType.includes('Ementa');
+        const buttonLabel = isEmenta ? '📜 Ver Ementa do Acórdão' : '📑 Ver Teor do Despacho/Decisão';
         
         let tagsHtml = d.temas.map(t => 
           `<span class="text-[10px] bg-[var(--content)] border border-[var(--border)] text-[#c9d1d9] px-2 py-0.5 rounded-md">${{t}}</span>`
@@ -366,6 +372,7 @@ html_template = f"""<!DOCTYPE html>
               <div class="flex flex-wrap items-center gap-2">
                 <span class="text-xs font-mono font-bold text-blue-400">${{d.numFormatado}}</span>
                 <span class="badge bg-[#161b22] text-[#8b949e] border border-[var(--border)]">${{d.classe}}</span>
+                <span class="badge bg-purple-500/15 text-purple-300 border border-purple-500/30">${{d.docType}}</span>
                 <span class="text-xs text-[var(--muted-foreground)]">📅 ${{d.dataPublicacao}}</span>
               </div>
               <div class="flex items-center gap-2">
@@ -401,14 +408,14 @@ html_template = f"""<!DOCTYPE html>
               <p class="text-[var(--foreground)] leading-relaxed">${{d.resumoImpacto}}</p>
             </div>
 
-            <!-- Ementa Expansível -->
+            <!-- Botões de Ação -->
             <div class="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
               <button 
                 id="btn-ementa-${{idx}}" 
                 onclick="toggleEmenta(${{idx}})" 
-                class="text-xs text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1"
+                class="text-xs text-blue-400 hover:text-blue-300 font-medium transition-colors flex items-center gap-1.5 bg-[#161b22] px-3 py-1.5 rounded-lg border border-[var(--border)]"
               >
-                🔽 Ver Ementa e Fundamentação
+                ${{buttonLabel}}
               </button>
               
               <a 
@@ -421,9 +428,9 @@ html_template = f"""<!DOCTYPE html>
               </a>
             </div>
 
-            <!-- Bloco oculto com a ementa -->
-            <div id="ementa-${{idx}}" class="hidden p-3 bg-black/60 rounded-lg border border-[var(--border)] text-[11px] text-[var(--muted-foreground)] font-mono whitespace-pre-wrap leading-relaxed">
-${{d.trechoDestaque}}
+            <!-- Bloco oculto com a Ementa ou Despacho Limpo -->
+            <div id="ementa-${{idx}}" class="hidden p-3.5 bg-black/70 rounded-lg border border-[var(--border)] text-[11px] text-[var(--foreground)] font-mono whitespace-pre-wrap leading-relaxed">
+${{d.conteudoLimpo}}
             </div>
           </div>
         `;
@@ -444,4 +451,4 @@ ${{d.trechoDestaque}}
 with open('decisoes_caixa.html', 'w', encoding='utf-8') as f:
     f.write(html_template)
 
-print("Arquivo decisoes_caixa.html gerado com sucesso!")
+print("decisoes_caixa.html re-gerado com sucesso com limpeza total de ementas e despachos!")
