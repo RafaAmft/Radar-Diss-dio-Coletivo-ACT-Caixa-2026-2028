@@ -1,4 +1,17 @@
-<!DOCTYPE html>
+# -*- coding: utf-8 -*-
+"""
+Script para gerar o novo index.html baseado na Alternativa 1:
+'Radar Matriz: Precedente TST ➔ Dissídio 2026 ➔ Veredito da IA'
+Foco absoluto nas decisões e sentenças históricas que impactaram a Caixa
+e sua conexão direta com a sentença do dissídio atual (DCG 2026).
+"""
+
+import json
+import os
+
+OUTPUT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "index.html"))
+
+HTML_CONTENT = """<!DOCTYPE html>
 <html lang="pt-BR" class="dark">
 <head>
   <meta charset="UTF-8">
@@ -713,3 +726,13 @@
 
 </body>
 </html>
+"""
+
+def main():
+    print(f"Escrevendo novo index.html em: {OUTPUT_PATH}")
+    with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
+        f.write(HTML_CONTENT)
+    print("Sucesso! Novo index.html gerado com base na Alternativa 1.")
+
+if __name__ == "__main__":
+    main()
