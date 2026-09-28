@@ -1,4 +1,14 @@
-# ⚖️ Radar de Dissídios Coletivos & Jurimetria Caixa (TST 2026–2028)
+# -*- coding: utf-8 -*-
+"""
+Script para atualizar o README.md principal (raiz do repositório)
+com documentação de nível de produção para publicação no LinkedIn e portfólio.
+"""
+
+import os
+
+ROOT_README = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "README.md"))
+
+CONTENT = """# ⚖️ Radar de Dissídios Coletivos & Jurimetria Caixa (TST 2026–2028)
 
 [![GitHub Pages](https://img.shields.io/badge/Deploy-GitHub%20Pages-success?style=for-the-badge&logo=github)](https://rafaamft.github.io/Radar-Diss-dio-Coletivo-ACT-Caixa-2026-2028/)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python)](https://python.org)
@@ -157,3 +167,13 @@ Analista de Dados • Jurimetria • Inteligência Artificial aplicada ao Direit
 ## 📄 Licença
 
 Este projeto é disponibilizado sob a licença [MIT](LICENSE). Dados públicos extraídos do portal da Justiça do Trabalho em conformidade com a Lei de Acesso à Informação (Lei nº 12.527/2011).
+"""
+
+def main():
+    print(f"Atualizando README.md raiz em: {ROOT_README}")
+    with open(ROOT_README, "w", encoding="utf-8") as f:
+        f.write(CONTENT)
+    print("README.md raiz atualizado com sucesso!")
+
+if __name__ == "__main__":
+    main()

@@ -31,11 +31,14 @@ scraping_dissidio_coletivo_greve/
 │   ├── dissidios_coletivos_estatais_2016_2026.xlsx
 │   ├── dissidios_estatais_suscitantes.csv
 │   ├── dissidios_estatais_suscitadas.csv
-│   ├── perfil_ministros_sdc_tst.xlsx
-│   ├── perfil_ministros_sdc_tst.json
-│   ├── comportamento_turmas_tst.xlsx
-│   ├── comportamento_turmas_tst.json
-│   └── dados_decisoes_caixa.json
+│   ├── perfil_ministros_sdc_tst.xlsx / .json
+│   ├── comportamento_turmas_tst.xlsx / .json
+│   ├── dados_decisoes_caixa.json
+│   └── ai_dataset/               # Formatos RAG, Fine-Tuning e Knowledge Base
+│       ├── dataset_caixa_ai.json
+│       ├── dataset_caixa_ai.jsonl
+│       ├── knowledge_base_caixa.md
+│       └── analise_previsao_sentenca_godinho.md
 ├── tests/
 │   ├── test_html_utils.py        # Testes de limpeza de tags e parsing de despachos
 │   ├── test_cnj_utils.py         # Testes de números CNJ e mapeamento de tribunais
@@ -48,6 +51,9 @@ scraping_dissidio_coletivo_greve/
 ├── generate_final_spreadsheets.py# Geração definitiva de XLSX/CSV com saneamento de polos
 ├── clean_and_finalize_data.py    # Validação e auditoria de integridade das planilhas
 ├── extract_caixa_jurimetria.py   # Extração analítica dos dissídios e liminares da Caixa
+├── export_ai_dataset.py          # Exportação do dataset nos padrões RAG / Fine-Tuning para LLMs
+├── generate_clean_index.py       # Geração da nova homepage executiva (Matriz Precedente ➔ Veredito)
+├── generate_decisoes_caixa_html.py# Geração do catálogo interativo com as 51 decisões da Caixa
 ├── sdc_ministers_profile.py      # Jurimetria e mapa decisório dos Ministros da SDC
 ├── turmas_behavior_analysis.py   # Análise do comportamento jurisprudencial das 8 Turmas
 ├── requirements.txt              # Dependências do projeto
