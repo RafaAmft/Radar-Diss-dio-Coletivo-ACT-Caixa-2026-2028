@@ -1,23 +1,32 @@
+"""
+Análise empírica e jurimétrica do perfil decisório dos Ministros da SDC (Seção Especializada em Dissídios Coletivos) do TST.
+Avalia tendências quanto a abusividade de greve, desconto de dias parados, homologação de acordos e comum acordo.
+"""
+
 import json
 import re
-import os
-import pandas as pd
+import logging
+from pathlib import Path
 from collections import defaultdict
-from bs4 import BeautifulSoup
+import pandas as pd
+from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
 
-def clean_html(text):
-    if not text:
-        return ""
-    if "<" in text and ">" in text:
-        soup = BeautifulSoup(text, 'html.parser')
-        return soup.get_text(separator=' ')
-    return text
+from config.constants import PROJECT_ROOT, OUTPUT_DIR
+from utils.html_utils import clean_html
 
-def normalize_relator(name):
+logger = logging.getLogger("sdc_profile")
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter("[%(asctime)s] %(levelname)s: %(message)s", datefmt="%Y-%m-%d %H:%M:%S"))
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
+
+
+def normalize_relator(name: str) -> str:
+    """Padroniza a grafia do nome dos ministros relatores da SDC."""
     if not name:
         return "NÃO INFORMADO"
     name = name.strip().title()
-    # Normalize variants
     if "Ives Gandra" in name:
         return "Ives Gandra Martins Filho"
     if "Godinho" in name:
@@ -48,224 +57,168 @@ def normalize_relator(name):
         return "Cláudio Mascarenhas Brandão"
     return name
 
-def analyze_decision_content(full_text):
-    """
-    Classifies the judicial decision across core dimensions:
-    - Abusividade da greve
-    - Dias parados (desconto, compensação, abono)
-    - Reajuste salarial
-    - Desfecho do processo
-    - Comum acordo
-    """
+
+def analyze_decision_content(full_text: str) -> dict:
+    """Classifica as dimensões substantivas de uma decisão da SDC."""
     text = full_text.lower()
     
     # 1. Abusividade da Greve
-    abusividade = "Não analisada / Sem greve"
-    if any(k in text for k in ["greve", "paralisação", "paralisacao", "abusiv"]):
-        # Check patterns for non-abusive / legitimate
-        is_nao_abusiva = bool(re.search(
-            r'(declarar|declara-se|julgar|julga-se|reconhecer|reconhece-se)\s+(a\s+)?(não\s+abusiv\w+|legítim\w+|a\s+legalidade)|'
-            r'(não\s+se\s+vislumbra|afastar|rejeitar|improcedente\s+o\s+pedido\s+de\s+declaração\s+de)\s+(a\s+)?abusividade|'
-            r'greve\s+(não\s+é\s+abusiva|não\s+foi\s+abusiva|legítima|não\s+deve\s+ser\s+considerada\s+abusiva)|'
-            r'a\s+legalidade\s+da\s+greve',
-            text
-        ))
-        # Check patterns for abusive / illegal
-        is_abusiva = bool(re.search(
-            r'(declarar|declara-se|julgar|julga-se|reconhecer|reconhece-se)\s+(a\s+)?abusiv\w+|'
-            r'greve\s+(é\s+abusiva|foi\s+abusiva|ilegal|abusiva,\s+segundo)|'
-            r'procedente\s+(o\s+pedido\s+de\s+declaração\s+de\s+)?abusividade|'
-            r'declarada\s+a\s+abusividade|julgou-se\s+abusiva|julga-se\s+abusiva',
-            text
-        ))
-        
-        if is_abusiva and not is_nao_abusiva:
-            abusividade = "Abusiva"
-        elif is_nao_abusiva and not is_abusiva:
+    abusividade = "Não analisado / Não aplicável"
+    if any(k in text for k in ["declarar a abusividade", "declara-se a abusividade", "julga-se abusiva", "greve abusiva", "foi abusiva"]):
+        if any(k in text for k in ["não abusiva", "declarar a não abusividade", "ausência de abusividade", "improcedente o pedido de declaração de abusividade"]):
             abusividade = "Não Abusiva"
-        elif is_abusiva and is_nao_abusiva:
-            if re.search(r'não\s+abusiv|legalidade\s+da\s+greve', text[-3000:]):
-                abusividade = "Não Abusiva"
-            elif re.search(r'abusiv', text[-3000:]):
-                abusividade = "Abusiva"
-            else:
-                abusividade = "Parcialmente Abusiva / Controversa"
-
-    # 2. Dias Parados
-    dias_parados = "Não fixado / Conforme acordo"
-    if any(k in text for k in ["dias parados", "dias de paralisa", "dias n trabalhados", "dias descontados", "sal decorrente da greve", "oj 10", "oj n 10"]):
-        has_desconto = bool(re.search(
-            r'(autorizar|determinar|autoriza-se|determina-se|manter|mantém-se|procede\s+o|efetuar|valores)\s+(o\s+)?desconto|'
-            r'desconto\s+dos\s+dias\s+(parados|não\s+trabalhados|de\s+greve)|'
-            r'devolução\s+dos\s+dias\s+descontados|'
-            r'aplicação\s+da\s+oj\s+(nº\s+)?10|suspensão\s+do\s+contrato\s+de\s+trabalho',
-            text
-        ))
-        has_compensacao = bool(re.search(
-            r'(autorizar|determinar|facultar|autoriza-se|determina-se|manter|deferir)\s+(a\s+)?compensação|'
-            r'compensação\s+de\s+(dias|horas|jornada)|'
-            r'compensados\s+os\s+dias',
-            text
-        ))
-        has_pagamento = bool(re.search(
-            r'(determinar|deferir)\s+o\s+pagamento\s+dos\s+dias|'
-            r'abono\s+dos\s+dias|'
-            r'vedado\s+o\s+desconto',
-            text
-        ))
+        else:
+            abusividade = "Abusiva"
+    elif any(k in text for k in ["não abusiva", "ausência de abusividade", "improcedência da abusividade", "legalidade da greve"]):
+        abusividade = "Não Abusiva"
+    elif "greve" in text and ("legal" in text or "abusiv" in text):
+        abusividade = "Análise Incidental"
         
-        if has_desconto and has_compensacao:
+    # 2. Tratamento dos Dias Parados
+    dias_parados = "Não fixado / Conforme acordo"
+    if any(k in text for k in ["desconto dos dias", "descontar os dias", "autoriza o desconto", "autorizar o desconto", "procedente o desconto", "desconto salarial correspondente"]):
+        if any(k in text for k in ["compensação", "compensar", "50% descontados e 50% compensados", "metade compensada", "parte compensada"]):
             dias_parados = "Desconto Parcial com Compensação"
-        elif has_desconto:
+        else:
             dias_parados = "Desconto Integral dos Dias Parados"
-        elif has_compensacao:
-            dias_parados = "Compensação de Horas/Dias"
-        elif has_pagamento:
-            dias_parados = "Pagamento/Abono dos Dias Parados"
-
-    # 3. Reajuste Salarial
-    reajuste = "Não aplicável / Jurídico"
-    if "reajuste salarial" in text or "índice de reajuste" in text or "inpc" in text or "ipca" in text or "reposição salarial" in text:
-        if bool(re.search(r'homologar\s+o\s+acordo|conforme\s+acordo\s+coletivo', text)):
-            reajuste = "Homologado Conforme Acordo"
-        elif bool(re.search(r'conceder\s+(o\s+)?reajuste\s+(salarial\s+)?(de|pelo|no\s+percentual)|fixar\s+o\s+reajuste|inpc\s+integral|percentual\s+de\s+\d+[\.,]?\d*%', text)):
-            reajuste = "Concedido (Total ou Parcial)"
-        elif bool(re.search(r'indeferir\s+(o\s+)?reajuste|reajuste\s+zero|sem\s+reajuste|improcedente\s+o\s+pedido\s+de\s+reajuste', text)):
-            reajuste = "Indeferido / Reajuste Zero"
-        else:
-            reajuste = "Apreciado / Parcial"
-
-    # 4. Desfecho do Processo
+    elif any(k in text for k in ["compensação dos dias", "compensar os dias", "vedado o desconto", "proibido o desconto", "abono dos dias", "abonar os dias"]):
+        dias_parados = "Compensação de Horas/Dias"
+        
+    # 3. Desfecho Processual
     desfecho = "Sentença Normativa / Mérito"
-    if bool(re.search(r'homologa(r|-se)?\s+(o\s+)?acordo|termo\s+de\s+acordo|autocomposição', text[-4000:])):
+    if any(k in text for k in ["homologa-se o acordo", "homologar o acordo", "acordo homologado", "homologação do acordo"]):
         desfecho = "Homologação de Acordo"
-    elif bool(re.search(r'extinguir\s+(o\s+processo)?\s+sem\s+resolução\s+do\s+mérito|julgar\s+extinto\s+o\s+processo\s+sem|artigo\s+485|art\.\s+485', text[-4000:])):
+    elif any(k in text for k in ["extingue-se o processo sem resolução", "extinguir o processo", "processo extinto sem resolução", "falta de comum acordo", "ausência de comum acordo"]):
         desfecho = "Extinção sem Resolução do Mérito"
-    elif bool(re.search(r'dar\s+provimento\s+ao\s+recurso|negar\s+provimento\s+ao\s+recurso', text[-4000:])):
-        if "dar provimento" in text[-4000:]:
-            desfecho = "Recurso Provido (Reforma Decisão de Origem)"
-        else:
-            desfecho = "Recurso Desprovido (Mantida Decisão de Origem)"
-            
-    # 5. Comum Acordo (art. 114, § 2º, CF)
-    comum_acordo = "Não suscitado"
-    if "comum acordo" in text or "mútuo consenso" in text or "114, § 2" in text or "114, §2" in text:
-        if bool(re.search(r'falta\s+de\s+comum\s+acordo|ausência\s+de\s+comum\s+acordo|extinção.*?comum\s+acordo|acolher\s+a\s+preliminar\s+de\s+ausência\s+de\s+comum\s+acordo', text)):
+    elif any(k in text for k in ["dar provimento ao recurso", "dar-lhe provimento"]):
+        desfecho = "Recurso Ordinário Provido"
+    elif any(k in text for k in ["negar provimento ao recurso", "negar-lhe provimento"]):
+        desfecho = "Recurso Ordinário Desprovido"
+        
+    # 4. Comum Acordo Constitucional (art. 114, § 2º)
+    comum_acordo = "Não debatido"
+    if any(k in text for k in ["comum acordo", "art. 114, § 2º", "artigo 114, § 2"]):
+        if any(k in text for k in ["acolhe-se a preliminar de ausência de comum acordo", "extinção por falta de comum acordo", "ausente o mútuo consentimento", "recusa legítima"]):
             comum_acordo = "Acolhida preliminar (Extinção por Falta de Comum Acordo)"
-        elif bool(re.search(r'rejeitar\s+a\s+preliminar\s+de\s+(ausência\s+de\s+)?comum\s+acordo|comum\s+acordo\s+tácito|mitigação\s+do\s+comum\s+acordo|dispensado\s+o\s+comum\s+acordo\s+em\s+greve', text)):
+        elif any(k in text for k in ["rejeita-se a preliminar de comum acordo", "mitigação do comum acordo", "greve dispensa comum acordo", "recusa injustificada"]):
             comum_acordo = "Rejeitada preliminar (Mitigação/Greve Dispensa)"
-
+        else:
+            comum_acordo = "Debatido sem Acolhimento"
+            
     return {
-        "abusividade": abusividade,
-        "dias_parados": dias_parados,
-        "reajuste": reajuste,
-        "desfecho": desfecho,
-        "comum_acordo": comum_acordo
+        "analise_abusividade": abusividade,
+        "tratamento_dias_parados": dias_parados,
+        "desfecho_processual": desfecho,
+        "posicao_comum_acordo": comum_acordo
     }
 
-def build_sdc_ministers_profile():
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    entity_records_file = os.path.join(base_dir, "all_entity_records.json")
+
+def derive_minister_profile(relator: str, total: int, taxa_desconto: float, taxa_acordo: float, taxa_abusividade: float) -> str:
+    """Gera síntese do perfil orientada por métricas quantitativas e histórico doutrinário."""
+    # Linhas de referência dos ministros mais frequentes da SDC
+    dias_label = "rigor na aplicação do desconto (OJ 10 SDC)" if taxa_desconto >= 50 else "favorável à compensação/negociação de dias"
+    conciliacao_label = f"alta conciliação ({taxa_acordo}% acordos)" if taxa_acordo >= 30 else "perfil impositivo/normativo"
+
+    if relator == "Ives Gandra Martins Filho":
+        return "Rigoroso na legalidade estrita; alta aplicação do desconto salarial (OJ 10 SDC) e exigência de comum acordo"
+    if relator == "Mauricio Godinho Delgado":
+        return "Social-trabalhista; favorável à compensação de horas, mitigação do comum acordo em greve e incentivo à conciliação"
+    if relator == "Kátia Magalhães Arruda":
+        return "Proteção aos direitos fundamentais e liberdade sindical; incentivo à negociação coletiva e compensação de dias"
+    if relator == "Guilherme Augusto Caputo Bastos":
+        return "Foco na mediação e conciliação; rigor na preservação de atividades essenciais e contingente mínimo"
+    if relator == "Maria Cristina Irigoyen Peduzzi":
+        return "Institucional/formalista; deferente aos limites orçamentários das estatais e estrita aplicação jurisprudencial"
+    if relator == "Dora Maria da Costa":
+        return "Conciliadora com ênfase na segurança jurídica e aplicação dos precedentes da SDC"
+    if relator == "Alexandre de Souza Agra Belmonte":
+        return "Equilíbrio entre direito de greve e preservação dos serviços públicos essenciais"
+
+    return f"Tendência jurisprudencial SDC: {dias_label}; {conciliacao_label}"
+
+
+def build_ministers_profile():
+    logger.info("Iniciando processamento jurimétrico dos ministros da SDC/TST...")
     
-    print(f"Carregando registros de estatais da SDC de: {entity_records_file}")
-    with open(entity_records_file, 'r', encoding='utf-8') as f:
-        data = json.load(f)
-        
-    unique_procs = {}
-    for entity, procs in data.items():
-        for p in procs:
-            num = p.get('numFormatado')
-            if num and num not in unique_procs:
-                p['matched_primary_entity'] = entity
-                unique_procs[num] = p
-                
-    print(f"Total de processos únicos de estatais na SDC: {len(unique_procs)}")
-    
-    analyzed_cases = []
-    
-    for num, proc in unique_procs.items():
-        relator_raw = proc.get('nomRelator', '')
-        relator = normalize_relator(relator_raw)
-        
-        full_content = proc.get('txtConteudoDecisao') or ''
-        text_clean = clean_html(full_content)
-        
-        # In case txtConteudoDecisao is small, complement with ementa/txtTemaProc
-        if len(text_clean) < 100:
-            text_clean += " " + (proc.get('txtTemaProc') or '') + " " + (proc.get('txtEmenta') or '')
+    # Busca por fontes de dados consolidadas
+    planilha_path = OUTPUT_DIR / "dissidios_coletivos_estatais_2016_2026.xlsx"
+    if not planilha_path.is_file():
+        planilha_path = PROJECT_ROOT / "dissidios_coletivos_estatais_2016_2026.xlsx"
+
+    all_cases = []
+    if planilha_path.is_file():
+        df_tab1 = pd.read_excel(planilha_path, sheet_name="Estatal Suscitante")
+        df_tab2 = pd.read_excel(planilha_path, sheet_name="Estatal Suscitada")
+        for _, row in pd.concat([df_tab1, df_tab2], ignore_index=True).iterrows():
+            all_cases.append(row.to_dict())
+
+    # Complementa com cache de entidades brutas
+    entities_path = PROJECT_ROOT / "all_entity_records.json"
+    if entities_path.is_file():
+        with open(entities_path, "r", encoding="utf-8") as f:
+            all_entity_records = json.load(f)
+    else:
+        all_entity_records = {}
+
+    classified_decisions = []
+    seen_cnjs = set()
+
+    for ent, recs in all_entity_records.items():
+        for r in recs:
+            num = r.get("numFormatado") or r.get("numero")
+            if not num or str(num) in seen_cnjs:
+                continue
+            seen_cnjs.add(str(num))
             
-        dims = analyze_decision_content(text_clean)
-        
-        analyzed_cases.append({
-            "processo": num,
-            "classe": proc.get('codClasseProcessual') or proc.get('tipo', 'DC/RO'),
-            "relator": relator,
-            "entidade_estatal": proc.get('matched_primary_entity', ''),
-            "data_julgamento": proc.get('dtaJulgamento', ''),
-            "data_publicacao": proc.get('dtaPublicacao', ''),
-            "abusividade_greve": dims['abusividade'],
-            "tratamento_dias_parados": dims['dias_parados'],
-            "reajuste_salarial": dims['reajuste'],
-            "desfecho_processual": dims['desfecho'],
-            "posicao_comum_acordo": dims['comum_acordo'],
-            "tamanho_texto": len(text_clean)
-        })
-        
-    df_cases = pd.DataFrame(analyzed_cases)
+            relator_raw = r.get("nomRelatorSemTratamento") or r.get("nomRelator") or ""
+            relator = normalize_relator(relator_raw)
+            if not relator or relator == "NÃO INFORMADO":
+                continue
+                
+            texto_full = clean_html(r.get("inteiroTeorHtml") or r.get("txtConteudoDecisao") or r.get("ementa") or "")
+            if len(texto_full) < 100:
+                continue
+                
+            analysis = analyze_decision_content(texto_full)
+            classified_decisions.append({
+                "processo": str(num),
+                "entidade": ent,
+                "relator": relator,
+                "data": r.get("dtaPublicacao") or r.get("dtaJulgamento") or "",
+                **analysis
+            })
+
+    logger.info("Total de decisões substantivas de estatais classificadas: %d", len(classified_decisions))
+    df_decisions = pd.DataFrame(classified_decisions)
     
-    # Aggregation per Minister
     ministers_summary = []
-    
-    for relator, group in df_cases.groupby('relator'):
+    for relator, group in df_decisions.groupby("relator"):
         total = len(group)
-        if total < 5:  # filter noise or rarely acting ministers
+        if total < 5:
             continue
             
-        # Greve
-        greve_cases = group[group['abusividade_greve'].isin(['Abusiva', 'Não Abusiva', 'Parcialmente Abusiva / Controversa'])]
+        greve_cases = group[group["analise_abusividade"].isin(["Abusiva", "Não Abusiva"])]
         total_greve = len(greve_cases)
-        abusivas = len(group[group['abusividade_greve'] == 'Abusiva'])
-        nao_abusivas = len(group[group['abusividade_greve'] == 'Não Abusiva'])
-        taxa_abusividade = round((abusivas / total_greve * 100), 1) if total_greve > 0 else None
+        abusivas = len(group[group["analise_abusividade"] == "Abusiva"])
+        nao_abusivas = len(group[group["analise_abusividade"] == "Não Abusiva"])
+        taxa_abusividade = round((abusivas / total_greve * 100), 1) if total_greve > 0 else 0.0
         
-        # Dias parados
-        dias_cases = group[group['tratamento_dias_parados'] != 'Não fixado / Conforme acordo']
+        dias_cases = group[group["tratamento_dias_parados"] != "Não fixado / Conforme acordo"]
         total_dias = len(dias_cases)
-        desconto_puro = len(group[group['tratamento_dias_parados'] == 'Desconto Integral dos Dias Parados'])
-        desconto_parcial = len(group[group['tratamento_dias_parados'] == 'Desconto Parcial com Compensação'])
-        compensacao = len(group[group['tratamento_dias_parados'] == 'Compensação de Horas/Dias'])
-        taxa_desconto = round(((desconto_puro + desconto_parcial) / total_dias * 100), 1) if total_dias > 0 else None
+        desconto_puro = len(group[group["tratamento_dias_parados"] == "Desconto Integral dos Dias Parados"])
+        desconto_parcial = len(group[group["tratamento_dias_parados"] == "Desconto Parcial com Compensação"])
+        compensacao = len(group[group["tratamento_dias_parados"] == "Compensação de Horas/Dias"])
+        taxa_desconto = round(((desconto_puro + desconto_parcial) / total_dias * 100), 1) if total_dias > 0 else 0.0
         
-        # Desfecho
-        acordos = len(group[group['desfecho_processual'] == 'Homologação de Acordo'])
-        sentencas = len(group[group['desfecho_processual'] == 'Sentença Normativa / Mérito'])
-        extincoes = len(group[group['desfecho_processual'] == 'Extinção sem Resolução do Mérito'])
-        recursos = len(group[group['desfecho_processual'].str.contains('Recurso')])
+        acordos = len(group[group["desfecho_processual"] == "Homologação de Acordo"])
+        sentencas = len(group[group["desfecho_processual"] == "Sentença Normativa / Mérito"])
+        extincoes = len(group[group["desfecho_processual"] == "Extinção sem Resolução do Mérito"])
         taxa_acordo = round((acordos / total * 100), 1)
         taxa_extincao = round((extincoes / total * 100), 1)
-        taxa_sentenca = round((sentencas / total * 100), 1)
         
-        # Comum Acordo
-        extinto_comum_acordo = len(group[group['posicao_comum_acordo'] == 'Acolhida preliminar (Extinção por Falta de Comum Acordo)'])
-        rejeitado_comum_acordo = len(group[group['posicao_comum_acordo'] == 'Rejeitada preliminar (Mitigação/Greve Dispensa)'])
+        extinto_comum_acordo = len(group[group["posicao_comum_acordo"] == "Acolhida preliminar (Extinção por Falta de Comum Acordo)"])
         
-        # Perfil sintético doutrinário
-        if relator == "Ives Gandra Martins Filho":
-            perfil = "Rigoroso na legalidade estrita; alta aplicação do desconto salarial (OJ 10 SDC) e exigência de comum acordo"
-        elif relator == "Mauricio Godinho Delgado":
-            perfil = "Social-trabalhista; favorável à compensação de horas, mitigação do comum acordo em greve e incentivo à conciliação"
-        elif relator == "Kátia Magalhães Arruda":
-            perfil = "Proteção aos direitos fundamentais e liberdade sindical; incentivo à negociação coletiva e compensação de dias"
-        elif relator == "Guilherme Augusto Caputo Bastos":
-            perfil = "Foco na mediação e conciliação; rigor na preservação de atividades essenciais e contingente mínimo"
-        elif relator == "Maria Cristina Irigoyen Peduzzi":
-            perfil = "Institucional/formalista; deferente aos limites orçamentários das estatais e estrita aplicação jurisprudencial"
-        elif relator == "Dora Maria da Costa":
-            perfil = "Conciliadora com ênfase na segurança jurídica e aplicação dos precedentes da SDC"
-        elif relator == "Alexandre de Souza Agra Belmonte":
-            perfil = "Equilíbrio entre direito de greve e preservação dos serviços públicos essenciais"
-        else:
-            perfil = "Tendência equilibrada alinhada aos precedentes e orientações jurisprudenciais da SDC"
+        perfil = derive_minister_profile(relator, total, taxa_desconto, taxa_acordo, taxa_abusividade)
             
         ministers_summary.append({
             "Ministro(a) Relator(a)": relator,
@@ -273,10 +226,10 @@ def build_sdc_ministers_profile():
             "Julgamentos c/ Análise de Greve": total_greve,
             "Greves Declaradas Abusivas": abusivas,
             "Greves Não Abusivas": nao_abusivas,
-            "Taxa de Abusividade (%)": taxa_abusividade if taxa_abusividade is not None else 0.0,
+            "Taxa de Abusividade (%)": taxa_abusividade,
             "Determinações de Desconto Salarial": desconto_puro + desconto_parcial,
             "Determinações de Compensação": compensacao,
-            "Taxa de Aplicação de Desconto (%)": taxa_desconto if taxa_desconto is not None else 0.0,
+            "Taxa de Aplicação de Desconto (%)": taxa_desconto,
             "Sentenças Normativas": sentencas,
             "Homologações de Acordo": acordos,
             "Extinções sem Mérito": extincoes,
@@ -287,25 +240,53 @@ def build_sdc_ministers_profile():
         })
         
     df_summary = pd.DataFrame(ministers_summary).sort_values(by="Total Julgamentos Estatais", ascending=False)
+
+    # Exportação XLSX com formatação
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    excel_targets = [
+        OUTPUT_DIR / "perfil_ministros_sdc_tst.xlsx",
+        PROJECT_ROOT / "perfil_ministros_sdc_tst.xlsx"
+    ]
     
-    # Save outputs
-    excel_out = os.path.join(base_dir, "perfil_ministros_sdc_tst.xlsx")
-    with pd.ExcelWriter(excel_out, engine='openpyxl') as writer:
-        df_summary.to_excel(writer, sheet_name="Perfil Relatores SDC", index=False)
-        df_cases.to_excel(writer, sheet_name="Base Analítica de Casos", index=False)
+    for ep in excel_targets:
+        with pd.ExcelWriter(ep, engine="openpyxl") as writer:
+            df_summary.to_excel(writer, sheet_name="Perfil dos Ministros SDC", index=False)
+            df_decisions.to_excel(writer, sheet_name="Decisões Detalhadas", index=False)
+            
+        # Formatação openpyxl
+        import openpyxl
+        wb = openpyxl.load_workbook(ep)
+        ws = wb["Perfil dos Ministros SDC"]
         
-    json_out = os.path.join(base_dir, "perfil_ministros_sdc_tst.json")
-    with open(json_out, 'w', encoding='utf-8') as f:
-        json.dump({
-            "summary": df_summary.to_dict(orient='records'),
-            "cases_count": len(df_cases)
-        }, f, ensure_ascii=False, indent=2)
+        header_fill = PatternFill(start_color="1F497D", end_color="1F497D", fill_type="solid")
+        header_font = Font(name="Calibri", size=11, bold=True, color="FFFFFF")
         
-    print(f"Perfil dos Ministros da SDC gerado com sucesso!")
-    print(f"Salvo em: {excel_out} e {json_out}")
-    return df_summary, df_cases
+        for cell in ws[1]:
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            
+        for col in ws.columns:
+            max_len = max(len(str(cell.value or "")) for cell in col)
+            col_letter = col[0].column_letter
+            ws.column_dimensions[col_letter].width = min(max(max_len + 3, 12), 45)
+            
+        wb.save(ep)
+
+    # Exportação JSON
+    json_targets = [
+        OUTPUT_DIR / "perfil_ministros_sdc_tst.json",
+        PROJECT_ROOT / "perfil_ministros_sdc_tst.json"
+    ]
+    for jp in json_targets:
+        with open(jp, "w", encoding="utf-8") as f:
+            json.dump(ministers_summary, f, ensure_ascii=False, indent=2)
+
+    logger.info("Perfis de ministros concluídos e salvos com sucesso!")
+    return df_summary
+
 
 if __name__ == "__main__":
-    df_summary, df_cases = build_sdc_ministers_profile()
-    print("\n--- RESUMO DO PERFIL DOS MINISTROS DA SDC (ESTATAIS) ---")
-    print(df_summary[["Ministro(a) Relator(a)", "Total Julgamentos Estatais", "Taxa de Abusividade (%)", "Taxa de Aplicação de Desconto (%)", "Taxa de Homologação de Acordo (%)"]].to_string(index=False))
+    df = build_ministers_profile()
+    print("\nRESUMO DO PERFIL DOS MINISTROS DA SDC:")
+    print(df[["Ministro(a) Relator(a)", "Total Julgamentos Estatais", "Taxa de Aplicação de Desconto (%)", "Taxa de Homologação de Acordo (%)"]].to_string())

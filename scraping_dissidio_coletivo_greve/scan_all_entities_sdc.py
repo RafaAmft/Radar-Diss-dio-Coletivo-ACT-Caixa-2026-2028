@@ -1,103 +1,84 @@
-import requests
-import json
-import time
+"""
+Varredura automatizada na SDC do TST para quantificação preliminar de dissídios por empresa estatal.
+Utiliza o catálogo canônico de ESTATAIS_INFO e o cliente TstApiClient.
+"""
 
-url = 'https://jurisprudencia-backend.tst.jus.br/rest/pesquisa-textual/1/20'
-headers = {'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0'}
+import logging
+from typing import Dict, Set
+from config.constants import (
+    ESTATAIS_INFO,
+    SDC_ORGAO_JUDICANTE,
+    CLASSES_DISSIDIO,
+    CLASSES_RECURSO,
+)
+from utils.tst_api import TstApiClient
 
-entities = [
-    ("ECT / Correios", ["Correios", "Empresa Brasileira de Correios e Telégrafos"]),
-    ("Petrobras", ["Petrobras", "Petróleo Brasileiro"]),
-    ("Caixa Econômica Federal", ["Caixa Econômica Federal", "CEF"]),
-    ("Banco do Brasil", ["Banco do Brasil"]),
-    ("EBSERH", ["EBSERH", "Empresa Brasileira de Serviços Hospitalares"]),
-    ("Dataprev", ["Dataprev", "Empresa de Tecnologia e Informações da Previdência"]),
-    ("Serpro", ["Serpro", "Serviço Federal de Processamento de Dados"]),
-    ("EBC", ["Empresa Brasil de Comunicação", "EBC"]),
-    ("Conab", ["Companhia Nacional de Abastecimento", "Conab"]),
-    ("Casa da Moeda", ["Casa da Moeda do Brasil", "Casa da Moeda"]),
-    ("Infraero", ["Infraero", "Empresa Brasileira de Infraestrutura Aeroportuária"]),
-    ("CBTU", ["Companhia Brasileira de Trens Urbanos", "CBTU"]),
-    ("Trensurb", ["Trensurb", "Empresa de Trens Urbanos de Porto Alegre"]),
-    ("Embrapa", ["Embrapa", "Empresa Brasileira de Pesquisa Agropecuária"]),
-    ("Eletrobras", ["Eletrobras", "Centrais Elétricas Brasileiras", "Eletronorte", "Furnas", "Chesf", "Eletrosul"]),
-    ("BNDES", ["BNDES", "Banco Nacional de Desenvolvimento Econômico e Social"]),
-    ("Finep", ["Finep", "Financiadora de Estudos e Projetos"]),
-    ("Codevasf", ["Codevasf", "Companhia de Desenvolvimento dos Vales do São Francisco"]),
-    ("Hemobrás", ["Hemobrás", "Empresa Brasileira de Hemoderivados"]),
-    ("Emgepron", ["Emgepron", "Empresa Gerencial de Projetos Navais"]),
-    ("EPL / Infra S.A.", ["EPL", "Infra S.A.", "Empresa de Planejamento e Logística", "Valec"]),
-    ("Nuclep", ["Nuclep", "Nuclebrás"]),
-    ("Imbel", ["Imbel", "Indústria de Material Bélico"]),
-    ("Ceitec", ["Ceitec"]),
-    ("Telebras", ["Telebras", "Telecomunicações Brasileiras"]),
-    ("Banco do Nordeste", ["Banco do Nordeste", "BNB"]),
-    ("Banco da Amazônia", ["Banco da Amazônia", "BASA"]),
-    ("BRB", ["Banco de Brasília", "BRB"]),
-    ("Metrô SP", ["Companhia do Metropolitano de São Paulo", "Metrô de São Paulo"]),
-    ("CPTM", ["Companhia Paulista de Trens Metropolitanos", "CPTM"]),
-    ("Sabesp", ["Sabesp", "Companhia de Saneamento Básico do Estado de São Paulo"]),
-    ("Cemig", ["Cemig", "Companhia Energética de Minas Gerais"]),
-    ("Copasa", ["Copasa", "Companhia de Saneamento de Minas Gerais"]),
-    ("Copel", ["Copel", "Companhia Paranaense de Energia"]),
-    ("Sanepar", ["Sanepar", "Companhia de Saneamento do Paraná"]),
-    ("Corsan", ["Corsan", "Companhia Riograndense de Saneamento"]),
-    ("CEEE", ["CEEE", "Companhia Estadual de Energia Elétrica"]),
-    ("Caesb", ["Caesb", "Companhia de Saneamento Ambiental do Distrito Federal"]),
-    ("Metrô DF", ["Companhia do Metropolitano do Distrito Federal", "Metrô DF"]),
-    ("Cedae", ["Cedae", "Companhia Estadual de Águas e Esgotos"]),
-    ("Comlurb", ["Comlurb", "Companhia Municipal de Limpeza Urbana"]),
-    ("SPTrans", ["SPTrans", "São Paulo Transporte"]),
-    ("Carris", ["Carris", "Companhia Carris Porto-Alegrense"]),
-    ("Embasa", ["Embasa", "Empresa Baiana de Águas e Saneamento"]),
-    ("Compesa", ["Compesa", "Companhia Pernambucana de Saneamento"])
-]
+logger = logging.getLogger("scan_entities")
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter("[%(asctime)s] %(levelname)s: %(message)s", datefmt="%Y-%m-%d %H:%M:%S"))
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
 
-classes = [
-    {'codFase': 'DCG', 'desFase': 'Dissídio Coletivo de Greve'},
-    {'codFase': 'DC', 'desFase': 'Dissídio Coletivo'},
-    {'codFase': 'RO', 'desFase': 'Recurso Ordinário'},
-    {'codFase': 'ROT', 'desFase': 'Recurso Ordinário Trabalhista'}
-]
 
-results = {}
+def scan_entities_sample(max_terms_per_entity: int = 2) -> Dict[str, int]:
+    """
+    Executa busca rápida para cada estatal mapeada e retorna a contagem de processos únicos na página inicial.
+    """
+    client = TstApiClient()
+    all_classes = CLASSES_DISSIDIO + CLASSES_RECURSO
+    results: Dict[str, int] = {}
 
-for ent_name, terms in entities:
-    total_ent = 0
-    procs = set()
-    for term in terms:
-        payload = {
-            'ou': '', 'e': term, 'termoExato': '', 'naoContem': '', 'ementa': '', 'dispositivo': '',
-            'numeracaoUnica': {'numero': '', 'ano': '', 'digito': '', 'orgao': '5', 'tribunal': '', 'vara': ''},
-            'orgaosJudicantes': [{'codigo': 47, 'sigla': 'SDC', 'descricao': 'Seção Especializada em Dissídios Coletivos'}],
-            'ministros': [], 'convocados': [],
-            'classesProcessuais': classes,
-            'codigosClassesPrecedentes': [], 'indicadores': [], 'assuntos': [],
-            'tipos': ['ACORDAO', 'DESPACHO'], 'orgao': 'TST',
-            'publicacaoInicial': None, 'publicacaoFinal': None,
-            'julgamentoInicial': '2016-09-24',
-            'julgamentoFinal': '2026-09-24',
-            'ordenacao': 'data'
-        }
-        try:
-            r = requests.post(url, json=payload, headers=headers, timeout=20)
-            if r.status_code == 200:
-                data = r.json()
-                tot = data.get('totalRegistros', 0)
-                regs = data.get('registros', [])
+    logger.info("Iniciando varredura rápida de processos na SDC por entidade estatal...")
+
+    for formal_name, patterns in ESTATAIS_INFO:
+        unique_procs: Set[str] = set()
+        # Filtra termos simplificados para a query da API a partir dos padrões
+        # Ex: r'\bECT\b' -> 'ECT'
+        search_terms = []
+        for p in patterns:
+            term = p.replace(r'\b', '').replace(r'\s+', ' ').replace(r'S\.?A\.?', 'S/A')
+            # remove caracteres regex complexos
+            clean_term = "".join(c for c in term if c.isalnum() or c in " /.-").strip()
+            if clean_term and len(clean_term) >= 3 and clean_term not in search_terms:
+                search_terms.append(clean_term)
+
+        for term in search_terms[:max_terms_per_entity]:
+            payload = {
+                "ou": "", "e": term, "termoExato": "", "naoContem": "", "ementa": "", "dispositivo": "",
+                "numeracaoUnica": {"numero": "", "ano": "", "digito": "", "orgao": "5", "tribunal": "", "vara": ""},
+                "orgaosJudicantes": SDC_ORGAO_JUDICANTE,
+                "ministros": [], "convocados": [],
+                "classesProcessuais": all_classes,
+                "codigosClassesPrecedentes": [], "indicadores": [], "assuntos": [],
+                "tipos": ["ACORDAO", "DESPACHO"], "orgao": "TST",
+                "publicacaoInicial": None, "publicacaoFinal": None,
+                "julgamentoInicial": "2016-09-24",
+                "julgamentoFinal": "2026-09-24",
+                "ordenacao": "data"
+            }
+
+            data = client.fetch_page(offset=1, page_size=20, payload=payload)
+            if data:
+                tot = data.get("totalRegistros", 0)
+                regs = data.get("registros", [])
                 for reg in regs:
-                    item = reg.get('registro', {})
-                    num = item.get('numFormatado')
+                    item = reg.get("registro", {})
+                    num = item.get("numFormatado") or item.get("numero")
                     if num:
-                        procs.add(num)
-                print(f"  [{ent_name}] term '{term}' -> {tot} hits (found {len(regs)} in first page)")
-            else:
-                print(f"  [{ent_name}] term '{term}' -> status {r.status_code}")
-        except Exception as e:
-            print(f"  [{ent_name}] term '{term}' -> error {e}")
-        time.sleep(0.3)
-    results[ent_name] = len(procs)
+                        unique_procs.add(str(num))
+                logger.info("  [%s] termo '%s' -> %d ocorrências totais (amostra de %d na primeira página)",
+                            formal_name, term, tot, len(regs))
 
-print("\nSUMMARY (unique processes seen in page 1):")
-for k, v in sorted(results.items(), key=lambda x: x[1], reverse=True):
-    print(f"{k}: {v}")
+        results[formal_name] = len(unique_procs)
+
+    print("\nRESUMO DA VARREDURA (Processos únicos na primeira página):")
+    for k, v in sorted(results.items(), key=lambda x: x[1], reverse=True):
+        if v > 0:
+            print(f"  {k}: {v}")
+
+    return results
+
+
+if __name__ == "__main__":
+    scan_entities_sample()

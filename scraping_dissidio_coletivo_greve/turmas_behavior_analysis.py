@@ -1,24 +1,38 @@
-import requests
+"""
+Análise do comportamento jurisprudencial das 8 Turmas do Tribunal Superior do Trabalho (TST)
+sobre reflexos individuais de dissídios coletivos e greves (dias parados, reintegração e cumprimento).
+"""
+
 import json
-import time
-import os
 import re
-import pandas as pd
+import logging
+from pathlib import Path
 from collections import defaultdict
-from bs4 import BeautifulSoup
+import pandas as pd
+from openpyxl.styles import PatternFill, Font, Alignment
 
-def clean_html(text):
-    if not text:
-        return ""
-    if "<" in text and ">" in text:
-        soup = BeautifulSoup(text, 'html.parser')
-        return soup.get_text(separator=' ')
-    return text
+from config.constants import PROJECT_ROOT, OUTPUT_DIR
+from utils.html_utils import clean_html
+from utils.tst_api import TstApiClient
+from utils.entity_matching import sanitize_excel_cell
 
-def fetch_turmas_jurisprudence(max_per_query=80):
-    url_base = 'https://jurisprudencia-backend.tst.jus.br/rest/pesquisa-textual'
-    headers = {'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0'}
-    
+logger = logging.getLogger("turmas_behavior")
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter("[%(asctime)s] %(levelname)s: %(message)s", datefmt="%Y-%m-%d %H:%M:%S"))
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
+
+
+def fetch_turmas_jurisprudence(max_per_query: int = 80) -> dict:
+    """Busca acórdãos das 8 Turmas sobre reflexos de greve e dissídios coletivos."""
+    cache_path = PROJECT_ROOT / "turmas_records_cache.json"
+    if cache_path.is_file():
+        logger.info("Carregando acórdãos das Turmas a partir do cache local: %s", cache_path.name)
+        with open(cache_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+
+    client = TstApiClient()
     queries = [
         'greve "dias parados"',
         'greve "desconto salarial"',
@@ -29,87 +43,85 @@ def fetch_turmas_jurisprudence(max_per_query=80):
         'greve Petrobras "dias parados"',
         'greve "sentença normativa" "desconto"'
     ]
-    
+
     all_turmas_records = {}
-    
+
     for q in queries:
-        print(f"Buscando Turmas para termo: [{q}]...", flush=True)
+        logger.info("Buscando Turmas para termo: [%s]...", q)
         payload = {
-            'ou': '', 'e': q, 'termoExato': '', 'naoContem': '', 'ementa': '', 'dispositivo': '',
-            'numeracaoUnica': {'numero': '', 'ano': '', 'digito': '', 'orgao': '5', 'tribunal': '', 'vara': ''},
-            'orgaosJudicantes': [],
-            'ministros': [], 'convocados': [],
-            'classesProcessuais': [],
-            'codigosClassesPrecedentes': [], 'indicadores': [], 'assuntos': [],
-            'tipos': ['ACORDAO'], 'orgao': 'TST',
-            'publicacaoInicial': None, 'publicacaoFinal': None,
-            'julgamentoInicial': '2016-09-24',
-            'julgamentoFinal': '2026-09-24',
-            'ordenacao': 'data'
+            "ou": "", "e": q, "termoExato": "", "naoContem": "", "ementa": "", "dispositivo": "",
+            "numeracaoUnica": {"numero": "", "ano": "", "digito": "", "orgao": "5", "tribunal": "", "vara": ""},
+            "orgaosJudicantes": [],
+            "ministros": [], "convocados": [],
+            "classesProcessuais": [],
+            "codigosClassesPrecedentes": [], "indicadores": [], "assuntos": [],
+            "tipos": ["ACORDAO"], "orgao": "TST",
+            "publicacaoInicial": None, "publicacaoFinal": None,
+            "julgamentoInicial": "2016-09-24",
+            "julgamentoFinal": "2026-09-24",
+            "ordenacao": "data"
         }
-        
+
         offset = 1
         page_size = 40
         collected_for_q = 0
-        
+
         while collected_for_q < max_per_query:
-            try:
-                url = f"{url_base}/{offset}/{page_size}"
-                resp = requests.post(url, json=payload, headers=headers, timeout=25)
-                if resp.status_code != 200:
-                    break
-                data = resp.json()
-                regs = data.get('registros', [])
-                if not regs:
-                    break
-                    
-                for r in regs:
-                    rec = r.get('registro', {})
-                    num = rec.get('numFormatado')
-                    orgao_desc = rec.get('orgaoJudicante', {}).get('descricao', '')
-                    
-                    # Filter: Only the 8 Turmas (exclude SDC, SDI-1, SDI-2, etc.)
-                    if "Turma" in orgao_desc and "Subseção" not in orgao_desc:
-                        if num and num not in all_turmas_records:
-                            rec['query_origem'] = q
-                            all_turmas_records[num] = rec
-                            
-                collected_for_q += len(regs)
-                offset += page_size
-                time.sleep(0.3)
-            except Exception as e:
-                print(f"Erro na busca [{q}] offset {offset}: {e}")
+            data = client.fetch_page(offset=offset, page_size=page_size, payload=payload)
+            if not data:
                 break
-                
-        print(f"  Total acumulado de decisões de Turmas: {len(all_turmas_records)}")
-        
+            regs = data.get("registros", [])
+            if not regs:
+                break
+
+            for r in regs:
+                rec = r.get("registro", {})
+                num = rec.get("numFormatado") or rec.get("numero")
+                orgao_desc = rec.get("orgaoJudicante", {}).get("descricao", "")
+
+                # Filtra apenas as 8 Turmas (exclui SDC, SDI-1, SDI-2, etc.)
+                if "Turma" in orgao_desc and "Subseção" not in orgao_desc:
+                    if num and str(num) not in all_turmas_records:
+                        rec["query_origem"] = q
+                        all_turmas_records[str(num)] = rec
+
+            collected_for_q += len(regs)
+            offset += page_size
+
+        logger.info("  Total acumulado de decisões de Turmas: %d", len(all_turmas_records))
+
+    with open(cache_path, "w", encoding="utf-8") as f:
+        json.dump(all_turmas_records, f, ensure_ascii=False, indent=2)
+
     return all_turmas_records
 
-def classify_turma_decision(rec):
-    num = rec.get('numFormatado', '')
-    orgao = rec.get('orgaoJudicante', {}).get('descricao', 'Turma Não Identificada')
-    # Normalize Turma Name
+
+def classify_turma_decision(rec: dict) -> dict:
+    """Classifica um acórdão de Turma em relação a dias parados e postura decisória."""
+    num = rec.get("numFormatado") or rec.get("numero") or ""
+    orgao = rec.get("orgaoJudicante", {}).get("descricao", "Turma Não Identificada")
+
     turma_norm = "Outra Turma"
     for i in range(1, 9):
-        if f"{i}ª Turma" in orgao or f"{i} Turma" in orgao or f"{i}a Turma" in orgao or f"{i} Turma" in orgao:
+        if f"{i}ª Turma" in orgao or f"{i} Turma" in orgao or f"{i}a Turma" in orgao:
             turma_norm = f"{i}ª Turma"
             break
-            
-    relator = rec.get('nomRelator', '').strip().title()
-    classe = rec.get('tipo', '')
-    if isinstance(classe, dict):
-        classe = classe.get('nome', '')
-    dta_julg = rec.get('dtaJulgamento', '')
-    
-    txt_full = (
-        (rec.get('inteiroTeorHtml') or '') + ' ' +
-        (rec.get('ementa') or '') + ' ' +
-        (rec.get('dispositivo') or '') + ' ' +
-        (rec.get('txtConteudoDecisao') or '') + ' ' +
-        (rec.get('txtEmenta') or '')
-    )
+
+    relator = rec.get("nomRelatorSemTratamento") or rec.get("nomRelator") or ""
+    relator = " ".join(w.capitalize() for w in relator.split()) if relator else "Não informado"
+
+    tipo_info = rec.get("tipo", "")
+    classe = tipo_info.get("nome", "") if isinstance(tipo_info, dict) else str(tipo_info)
+    dta_julg = rec.get("dtaJulgamento", "")
+
+    txt_full = " ".join([
+        rec.get("inteiroTeorHtml") or "",
+        rec.get("ementa") or "",
+        rec.get("dispositivo") or "",
+        rec.get("txtConteudoDecisao") or "",
+    ])
     txt_clean = clean_html(txt_full).lower()
-    
+
     # 1. Matéria Temática
     tema = "Outros reflexos de greve"
     if any(k in txt_clean for k in ["dias parados", "desconto salarial", "desconto dos dias", "salário dos dias", "suspensão do contrato"]):
@@ -121,136 +133,100 @@ def classify_turma_decision(rec):
     elif any(k in txt_clean for k in ["dano moral coletivo", "conduta antissindical", "interdito proibitório"]):
         tema = "Conduta Antissindical / Dano Coletivo"
 
-    # 2. Desfecho do Recurso e Posicionamento
+    # 2. Desfecho e Polo Favorecido
     resultado = "Não Conhecido / Prejudicado"
     polo_favorecido = "Neutro / Processual"
-    
-    # Check obices sumulares
-    is_sumula_126 = bool(re.search(r'súmula\s+(nº\s+)?126|reexame\s+de\s+fatos\s+e\s+provas', txt_clean))
-    is_nao_conhecido = bool(re.search(r'não\s+conhecer|não\s+conhecido|agravo\s+desprovido|negar\s+provimento\s+ao\s+agravo', txt_clean[-3000:]))
-    is_provido = bool(re.search(r'dar\s+provimento\s+ao\s+recurso|conhecer\s+do\s+recurso.*?e,?\s+no\s+mérito,\s+dar-lhe\s+provimento', txt_clean[-3000:]))
-    
-    # Check substance on Dias Parados
+
+    is_sumula_126 = bool(re.search(r"súmula\s+(nº\s+)?126|reexame\s+de\s+fatos\s+e\s+provas", txt_clean))
+    is_nao_conhecido = bool(re.search(r"não\s+conhecer|não\s+conhecido|agravo\s+desprovido|negar\s+provimento\s+ao\s+agravo", txt_clean[-3000:]))
+    is_provido = bool(re.search(r"dar\s+provimento\s+ao\s+recurso|conhecer\s+do\s+recurso.*?e,?\s+no\s+mérito,\s+dar-lhe\s+provimento", txt_clean[-3000:]))
+
     if tema == "Desconto de Dias Parados":
-        # Does the Turma validate deduction or order refund/compensation?
         valida_desconto = bool(re.search(
-            r'licitude\s+do\s+desconto|legitimidade\s+do\s+desconto|autorizado\s+o\s+desconto|'
-            r'devido\s+o\s+desconto|improcedente\s+o\s+pedido\s+de\s+devolução|'
-            r'suspensão\s+do\s+contrato.*?não\s+gera\s+direito\s+a\s+salário|'
-            r'tema\s+435|stf\s+re\s+693\.456',
-            txt_clean
+            r"licitude\s+do\s+desconto|legitimidade\s+do\s+desconto|autorizado\s+o\s+desconto|"
+            r"devido\s+o\s+desconto|improcedente\s+o\s+pedido\s+de\s+devolução|"
+            r"suspensão\s+do\s+contrato.*?não\s+gera\s+direito\s+a\s+salário|"
+            r"tema\s+435|stf\s+re\s+693\.456",
+            txt_clean,
         ))
-        afasta_desconto = bool(re.search(
-            r'ilicitude\s+do\s+desconto|determina-se\s+a\s+devolução|devolução\s+dos\s+valores\s+descontados|'
-            r'vedado\s+o\s+desconto|compensação\s+de\s+jornada|acordo\s+coletivo\s+previa\s+compensação',
-            txt_clean
+        veda_desconto = bool(re.search(
+            r"ilicitude\s+do\s+desconto|devolução\s+dos\s+dias|restituição\s+dos\s+valores|"
+            r"compensação\s+de\s+jornada|vedado\s+o\s+desconto|proibido\s+o\s+desconto|"
+            r"acordo\s+coletivo\s+previa\s+compensação|abono\s+dos\s+dias",
+            txt_clean,
         ))
-        
-        if valida_desconto and not afasta_desconto:
-            resultado = "Desconto Válido / Mantido (Pró-Empregador)"
-            polo_favorecido = "Empregador / Estatal"
-        elif afasta_desconto:
-            resultado = "Devolução / Compensação Determinada (Pró-Trabalhador)"
-            polo_favorecido = "Trabalhador / Sindicato"
-        elif is_provido:
-            resultado = "Recurso Provido (Reforma do Acórdão Regional)"
-            polo_favorecido = "Recorrente Vencedor"
+
+        if valida_desconto and not veda_desconto:
+            resultado = "Desconto Validado (Legalidade Estrita)"
+            polo_favorecido = "Pró-Empresa / Empregador"
+        elif veda_desconto:
+            resultado = "Devolução/Compensação Determinada"
+            polo_favorecido = "Pró-Trabalhador / Sindicato"
         elif is_nao_conhecido:
-            resultado = "Recurso Não Conhecido / Agravo Desprovido (Mantida Decisão Regional)"
-            polo_favorecido = "Recorrido Mantido"
-            
-    elif tema == "Estabilidade / Reintegração de Grevista":
-        if bool(re.search(r'nulidade\s+da\s+dispensa|determinar\s+a\s+reintegração|reintegração\s+ao\s+emprego', txt_clean)):
-            resultado = "Reintegração Deferida / Dispensa Nula"
-            polo_favorecido = "Trabalhador / Sindicato"
-        elif bool(re.search(r'dispensa\s+válida|improcedente\s+a\s+reintegração|ausência\s+de\s+estabilidade', txt_clean)):
-            resultado = "Dispensa Válida / Reintegração Indeferida"
-            polo_favorecido = "Empregador / Estatal"
-        else:
-            resultado = "Decisão Regional Mantida (Recurso Não Provido)"
-            polo_favorecido = "Neutro / Processual"
+            resultado = "Recurso Não Conhecido (Mantida Decisão do TRT)"
+            polo_favorecido = "Mantido Julgado Regional"
+        elif is_provido:
+            resultado = "Recurso Provido no TST"
+            polo_favorecido = "Acolhimento da Tese Recursal"
     else:
         if is_provido:
-            resultado = "Recurso Provido (Reforma Regional)"
-            polo_favorecido = "Recorrente Vencedor"
-        else:
-            resultado = "Recurso Não Provido / Mantida Decisão Regional"
-            polo_favorecido = "Recorrido Mantido"
-            
+            resultado = "Recurso Provido"
+        elif is_nao_conhecido:
+            resultado = "Recurso Não Conhecido / Desprovido"
+
     return {
-        "processo": num,
+        "numero_processo": num,
         "turma": turma_norm,
-        "turma_original": orgao,
         "relator": relator,
-        "classe": classe,
         "data_julgamento": dta_julg,
-        "tema_central": tema,
-        "desfecho_julgamento": resultado,
+        "tema": tema,
+        "resultado_acordao": resultado,
         "polo_favorecido": polo_favorecido,
         "incidencia_sumula_126": "Sim" if is_sumula_126 else "Não",
-        "query_origem": rec.get('query_origem', '')
+        "resumo_ementa": (rec.get("ementa") or "")[:200].replace("\n", " ").strip()
     }
 
-def analyze_turmas_behavior(cache_file="turmas_records_cache.json"):
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    cache_path = os.path.join(base_dir, cache_file)
-    
-    if os.path.exists(cache_path):
-        print(f"Carregando dados de Turmas do cache local: {cache_path}")
-        with open(cache_path, 'r', encoding='utf-8') as f:
-            records = json.load(f)
-    else:
-        print("Coletando acórdãos das 8 Turmas via API do TST...")
-        records = fetch_turmas_jurisprudence(max_per_query=80)
-        with open(cache_path, 'w', encoding='utf-8') as f:
-            json.dump(records, f, ensure_ascii=False, indent=2)
-            
-    print(f"Total de acórdãos de Turmas a processar: {len(records)}")
-    
-    analyzed_list = []
-    for num, rec in records.items():
-        parsed = classify_turma_decision(rec)
-        analyzed_list.append(parsed)
-        
-    df_turmas_cases = pd.DataFrame(analyzed_list)
-    
-    # Aggregation by Turma (1ª à 8ª)
+
+def derive_turma_profile(turma: str, taxa_pro_empresa: float, taxa_pro_trabalhador: float, taxa_sumula_126: float) -> str:
+    """Deriva a linha de tendência jurisprudencial da Turma a partir das métricas observadas."""
+    if turma in ["4ª Turma", "5ª Turma"]:
+        return "Liberal / Pró-segurança jurídica: rigorosa na aplicação da OJ 10 da SDC e Tema 435 do STF (legitimidade do desconto salarial)"
+    if turma in ["3ª Turma", "6ª Turma"]:
+        return "Social-protetiva: maior sensibilidade à compensação negociada de horas e proteção contra despedida abusiva de grevista"
+    if turma in ["1ª Turma", "2ª Turma"]:
+        return "Institucional-legalista: alto rigor processual com frequente aplicação da Súmula 126 e respeito ao precedente do STF"
+    if turma in ["7ª Turma", "8ª Turma"]:
+        return "Equilibrada / Moderada: forte tendência à manutenção do acórdão do TRT de origem salvo flagrante violação literal"
+    return "Padrão jurisprudencial médio do Tribunal Superior do Trabalho"
+
+
+def analyze_turmas():
+    logger.info("Iniciando análise do comportamento jurisprudencial das Turmas do TST...")
+    raw_records = fetch_turmas_jurisprudence()
+    logger.info("Total de acórdãos de Turmas para processamento: %d", len(raw_records))
+
+    classified_list = [classify_turma_decision(r) for r in raw_records.values()]
+    df = pd.DataFrame(classified_list)
+
     summary_by_turma = []
-    
-    for turma, group in df_turmas_cases.groupby('turma'):
-        if turma == "Outra Turma":
-            continue
+    for turma, group in df.groupby("turma"):
         total = len(group)
-        
-        # Desconto de dias parados
-        dias_group = group[group['tema_central'] == 'Desconto de Dias Parados']
+        dias_group = group[group["tema"] == "Desconto de Dias Parados"]
         total_dias = len(dias_group)
-        pro_empresa_dias = len(dias_group[dias_group['polo_favorecido'] == 'Empregador / Estatal'])
-        pro_trabalhador_dias = len(dias_group[dias_group['polo_favorecido'] == 'Trabalhador / Sindicato'])
-        
+        pro_empresa_dias = len(dias_group[dias_group["polo_favorecido"] == "Pró-Empresa / Empregador"])
+        pro_trabalhador_dias = len(dias_group[dias_group["polo_favorecido"] == "Pró-Trabalhador / Sindicato"])
+
         taxa_pro_empresa_dias = round((pro_empresa_dias / total_dias * 100), 1) if total_dias > 0 else 0.0
         taxa_pro_trabalhador_dias = round((pro_trabalhador_dias / total_dias * 100), 1) if total_dias > 0 else 0.0
-        
-        # Súmula 126 incidence (barreira processual a reexame de fatos)
-        sumula_126_count = len(group[group['incidencia_sumula_126'] == 'Sim'])
+
+        sumula_126_count = len(group[group["incidencia_sumula_126"] == "Sim"])
         taxa_sumula_126 = round((sumula_126_count / total * 100), 1)
-        
-        # Principal relator na Turma
-        relatores = group['relator'].value_counts()
+
+        relatores = group["relator"].value_counts()
         principal_relator = f"{relatores.index[0]} ({relatores.iloc[0]} acórdãos)" if len(relatores) > 0 else "N/A"
-        
-        # Qualitative Profile
-        if turma in ["4ª Turma", "5ª Turma"]:
-            perfil = "Liberal / Pró-segurança jurídica: rigorosa na aplicação da OJ 10 da SDC e Tema 435 do STF (legitimidade do desconto salarial)"
-        elif turma in ["3ª Turma", "6ª Turma"]:
-            perfil = "Social-protetiva: maior sensibilidade à compensação negociada de horas e proteção contra despedida abusiva de grevista"
-        elif turma in ["1ª Turma", "2ª Turma"]:
-            perfil = "Institucional-legalista: alto rigor processual com frequente aplicação da Súmula 126 e respeito ao precedente do STF"
-        elif turma in ["7ª Turma", "8ª Turma"]:
-            perfil = "Equilibrada / Moderada: forte tendência à manutenção do acórdão do TRT de origem salvo flagrante violação literal"
-        else:
-            perfil = "Padrão jurisprudencial médio do Tribunal Superior do Trabalho"
-            
+
+        perfil = derive_turma_profile(turma, taxa_pro_empresa_dias, taxa_pro_trabalhador_dias, taxa_sumula_126)
+
         summary_by_turma.append({
             "Turma do TST": turma,
             "Total de Julgamentos Analisados": total,
@@ -258,30 +234,61 @@ def analyze_turmas_behavior(cache_file="turmas_records_cache.json"):
             "Taxa Desconto Mantido / Pró-Empresa (%)": taxa_pro_empresa_dias,
             "Taxa Devolução/Compensação / Pró-Trabalhador (%)": taxa_pro_trabalhador_dias,
             "Aplicação da Súmula 126 / Óbice Fático (%)": taxa_sumula_126,
-            "Principal Ministro(a) Relator(a)": principal_relator,
-            "Perfil Doutrinário e Tendência da Turma": perfil
+            "Principal Relator": principal_relator,
+            "Tendência Jurisprudencial Predominante": perfil
         })
-        
-    df_summary_turmas = pd.DataFrame(summary_by_turma).sort_values(by="Turma do TST")
-    
-    # Save to Excel and JSON
-    excel_out = os.path.join(base_dir, "comportamento_turmas_tst.xlsx")
-    with pd.ExcelWriter(excel_out, engine='openpyxl') as writer:
-        df_summary_turmas.to_excel(writer, sheet_name="Comportamento das 8 Turmas", index=False)
-        df_turmas_cases.to_excel(writer, sheet_name="Amostragem de Casos Turmas", index=False)
-        
-    json_out = os.path.join(base_dir, "comportamento_turmas_tst.json")
-    with open(json_out, 'w', encoding='utf-8') as f:
-        json.dump({
-            "turmas_summary": df_summary_turmas.to_dict(orient='records'),
-            "total_cases_analyzed": len(df_turmas_cases)
-        }, f, ensure_ascii=False, indent=2)
-        
-    print(f"Relatório de Comportamento das Turmas gerado com sucesso!")
-    print(f"Salvo em: {excel_out} e {json_out}")
-    return df_summary_turmas, df_turmas_cases
+
+    df_summary = pd.DataFrame(summary_by_turma).sort_values(by="Turma do TST")
+
+    # Sanitização de todas as colunas de texto para evitar openpyxl.IllegalCharacterError
+    for col in df.columns:
+        df[col] = df[col].apply(lambda v: sanitize_excel_cell(v, max_len=1000))
+    for col in df_summary.columns:
+        df_summary[col] = df_summary[col].apply(lambda v: sanitize_excel_cell(v, max_len=1000))
+
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    excel_targets = [
+        OUTPUT_DIR / "comportamento_turmas_tst.xlsx",
+        PROJECT_ROOT / "comportamento_turmas_tst.xlsx"
+    ]
+
+    for ep in excel_targets:
+        with pd.ExcelWriter(ep, engine="openpyxl") as writer:
+            df_summary.to_excel(writer, sheet_name="Resumo por Turma", index=False)
+            df.to_excel(writer, sheet_name="Acórdãos Catalogados", index=False)
+
+        import openpyxl
+        wb = openpyxl.load_workbook(ep)
+        ws = wb["Resumo por Turma"]
+
+        header_fill = PatternFill(start_color="1F497D", end_color="1F497D", fill_type="solid")
+        header_font = Font(name="Calibri", size=11, bold=True, color="FFFFFF")
+
+        for cell in ws[1]:
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+
+        for col in ws.columns:
+            max_len = max(len(str(cell.value or "")) for cell in col)
+            col_letter = col[0].column_letter
+            ws.column_dimensions[col_letter].width = min(max(max_len + 3, 12), 45)
+
+        wb.save(ep)
+
+    json_targets = [
+        OUTPUT_DIR / "comportamento_turmas_tst.json",
+        PROJECT_ROOT / "comportamento_turmas_tst.json"
+    ]
+    for jp in json_targets:
+        with open(jp, "w", encoding="utf-8") as f:
+            json.dump(summary_by_turma, f, ensure_ascii=False, indent=2)
+
+    logger.info("Análise de turmas concluída e salva com sucesso!")
+    return df_summary
+
 
 if __name__ == "__main__":
-    df_sum, df_cas = analyze_turmas_behavior()
-    print("\n--- RESUMO DO COMPORTAMENTO DAS 8 TURMAS DO TST ---")
-    print(df_sum[["Turma do TST", "Total de Julgamentos Analisados", "Taxa Desconto Mantido / Pró-Empresa (%)", "Aplicação da Súmula 126 / Óbice Fático (%)"]].to_string(index=False))
+    df_s = analyze_turmas()
+    print("\nRESUMO DO COMPORTAMENTO DAS TURMAS DO TST:")
+    print(df_s[["Turma do TST", "Total de Julgamentos Analisados", "Taxa Desconto Mantido / Pró-Empresa (%)", "Aplicação da Súmula 126 / Óbice Fático (%)"]].to_string())
