@@ -1,0 +1,34 @@
+[
+  {
+    "id": "dcg-caixa-2026-godinho",
+    "cnj": "1000975-72.2026.5.00.0000",
+    "numFormatado": "DCG - 1000975-72.2026.5.00.0000",
+    "classe": "DCG",
+    "relator": "Mauricio Godinho Delgado",
+    "dataPublicacao": "2026-09-24",
+    "poloCaixa": "Suscitante (Autora da Ação)",
+    "partesContrarias": "CONTRAF e CONTEC",
+    "desfecho": "Liminar Deferida Parcialmente (60% Contingente + ACT Mantido)",
+    "temas": [
+      "Contingenciamento Mínimo",
+      "Saúde Caixa",
+      "Dias Parados & Greve",
+      "Piquetes & Acesso",
+      "Ultratividade do ACT"
+    ],
+    "docType": "Decisão Liminar em Tutela Provisória de Urgência",
+    "resumoImpacto": "O Min. Godinho rejeitou o pedido da Caixa de 80% e fixou contingente mínimo em 60% por agência (garantindo 40% do efetivo em greve legítima). Manteve a vigência de todas as cláusulas do ACT 2024/2026 (incluindo Saúde Caixa e vales), indeferiu a proibição de piquetes e derrubou o segredo de justiça dos autos. Prazo fatal de defesa: sábado (26/09) às 13h. Sessão de julgamento na SDC marcada para terça-feira (29/09) às 14h30.",
+    "conteudoLimpo": "📑 DISPOSITIVO DA DECISÃO LIMINAR (Min. Mauricio Godinho Delgado):\n\n\"...Dessa forma, sem prejuízo do juízo definitivo na análise da questão debatida, defiro parcialmente o pedido de liminar para determinar que sejam mantidos, em serviço, 60% (sessenta por cento) dos empregados da Requerente e de suas subsidiárias, de forma remota ou presencial, referentemente a cada agência, a partir da divulgação e/ou intimação desta decisão e durante todo o período de paralisação, observada a obrigação mútua das Partes pelo cumprimento da Lei de Greve (art. 11, caput).\n\nEstabeleço multa diária de R$ 100.000,00 (cem mil reais) em caso de descumprimento da liminar ora deferida, a ser paga pela entidade sindical que descumprir a presente determinação.\n\nIndefiro o pleito inibitório voltado a compelir os Sindicatos Suscitados à abstenção de atos obstativos ao livre acesso de empregados, clientes e usuários às dependências da Empresa...\n\nDefiro a manutenção provisória das cláusulas normativas do ACT 2024/2026 até a decisão definitiva do presente dissídio coletivo, sem conferir caráter definitivo ou de ultratividade às condições de trabalho.\n\n...determino, de imediato, o levantamento do segredo de justiça da petição inicial e dos documentos que a acompanham. Ressalvam-se do levantamento de sigilo, devendo ser mantidos com acesso restrito, apenas às partes e ao MPT, os seguintes documentos: Justificativas das cláusulas propostas (Doc. 03) e Relatório Atuarial e Nota Técnica GESAD n. 10336/2026 (Doc. 04)...\"",
+    "linkPje": "https://pje.tst.jus.br/pjekz/validacao/26092420574531700000207281146?instancia=3",
+    "is_flagship": true,
+    "detalhesLiminar": {
+      "pedidoCaixaContingente": "80%",
+      "deferidoGodinhoContingente": "60% (Presencial ou Remoto)",
+      "multaDescumprimento": "R$ 100.000,00 por dia",
+      "pedidoPiquetes": "Indeferido (Competência da Vara do Trabalho e ausência de abusos comprovados)",
+      "segredoJustica": "Levantado (Público, salvo Doc. 03 Justificativas e Doc. 04 Relatório Atuarial GESAD 10336/2026)",
+      "statusACTAnterior": "Prorrogado e Vigente integralmente até julgamento definitivo",
+      "proximosPassos": "Defesa das Confederações até 26/09 (13h) • Julgamento na SDC em 29/09 às 14:30"
+    }
+  }
+]

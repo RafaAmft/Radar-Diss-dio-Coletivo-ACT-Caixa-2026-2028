@@ -5,20 +5,28 @@
 !perfil_ministros_sdc_tst.json
 !comportamento_turmas_tst.json
 !monitoramento_diario_caixa.json
+!dados_decisoes_caixa.json
+!scraping_dissidio_coletivo_greve/config/*.json
+!scraping_dissidio_coletivo_greve/output/*.json
+!scraping_dissidio_coletivo_greve/perfil_ministros_sdc_tst.json
+!scraping_dissidio_coletivo_greve/comportamento_turmas_tst.json
+!scraping_dissidio_coletivo_greve/monitoramento_diario_caixa.json
+!scraping_dissidio_coletivo_greve/dados_decisoes_caixa.json
+
 scraping_dissidio_coletivo_greve/all_entity_records.json
 scraping_dissidio_coletivo_greve/sdc_all_ro_rot.json
 scraping_dissidio_coletivo_greve/sdc_all_dc_dcg.json
 scraping_dissidio_coletivo_greve/turmas_records_cache.json
 scraping_dissidio_coletivo_greve/matched_ro_entities.json
 
-# Arquivos não relacionados do workspace pessoal
+# Arquivos nao relacionados do workspace pessoal
 PET_*.pdf
 colecao_perfumes.*
 
 # Python caches e ambientes
 __pycache__/
 *.py[cod]
-*$py.class
+*.class
 *.env
 .venv/
 venv/
