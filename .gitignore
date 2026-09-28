@@ -12,6 +12,8 @@
 !scraping_dissidio_coletivo_greve/comportamento_turmas_tst.json
 !scraping_dissidio_coletivo_greve/monitoramento_diario_caixa.json
 !scraping_dissidio_coletivo_greve/dados_decisoes_caixa.json
+!output/ai_dataset/*.json
+!scraping_dissidio_coletivo_greve/output/ai_dataset/*.json
 
 scraping_dissidio_coletivo_greve/all_entity_records.json
 scraping_dissidio_coletivo_greve/sdc_all_ro_rot.json

@@ -1,0 +1,82 @@
+{
+  "gerado_em": "2026-09-28T11:32:03.082157",
+  "dataset": "Radar Dissídio Coletivo ACT Caixa 2026-2028",
+  "fonte": "TST - Tribunal Superior do Trabalho",
+  "total_decisoes": 51,
+  "total_documentos_ai": 51,
+  "total_caracteres": 266942,
+  "total_palavras": 40204,
+  "media_palavras_por_doc": 788,
+  "classes_processuais": {
+    "Recurso Ordinário (RO)": 35,
+    "Recurso Ordinário Trabalhista (ROT)": 5,
+    "Dissídio Coletivo (DC)": 4,
+    "Dissídio Coletivo de Greve (DCG)": 3,
+    "Recurso Ordinário em Dissídio Coletivo (RODC)": 3,
+    "DCG": 1
+  },
+  "desfechos": {
+    "Acordo Homologado": 19,
+    "Em Andamento / Despacho": 13,
+    "Recurso Desprovido (Mantida Decisão Anterior)": 7,
+    "Extinto sem Resolução de Mérito": 5,
+    "Recurso Provido pelo TST": 4,
+    "Sentença Normativa Fixada": 2,
+    "Liminar Deferida Parcialmente (60% Contingente + ACT Mantido)": 1
+  },
+  "temas": {
+    "Dias Parados & Greve": 32,
+    "Cláusulas Gerais do ACT": 14,
+    "Comum Acordo Constitucional": 12,
+    "Reajuste Salarial": 10,
+    "Advogados & Honorários da CEF": 9,
+    "Contingenciamento Mínimo": 4,
+    "Saúde Caixa": 4,
+    "Auxílio Alimentação & Cesta": 4,
+    "PLR & PLR Social": 3,
+    "Jornada & 7ª/8ª Hora": 3,
+    "Piquetes & Acesso": 1,
+    "Ultratividade do ACT": 1,
+    "Equilíbrio Atuarial & Índice de Basileia": 1,
+    "Compensação 180 Dias (Cláusula 87)": 1
+  },
+  "relatores": {
+    "Mauricio Godinho Delgado": 15,
+    "Katia Magalhaes Arruda": 7,
+    "Ives Gandra Martins Filho": 5,
+    "Maria Cristina Irigoyen Peduzzi": 5,
+    "Ives Gandra Da Silva Martins Filho": 4,
+    "Dora Maria Da Costa": 4,
+    "Fernando Eizo Ono": 3,
+    "Lelio Bentes Correa": 1,
+    "Kátia Magalhães Arruda": 1,
+    "Guilherme Augusto Caputo Bastos": 1,
+    "Aloysio Correa Da Veiga": 1,
+    "Aloysio Silva Corrêa Da Veiga": 1,
+    "Milton De Moura Franca": 1,
+    "Rider De Brito": 1,
+    "Antonio Jose De Barros Levenhagen": 1
+  },
+  "distribuicao_por_ano": {
+    "2005": 2,
+    "2006": 1,
+    "2007": 1,
+    "2016": 3,
+    "2017": 12,
+    "2018": 10,
+    "2019": 8,
+    "2020": 1,
+    "2021": 2,
+    "2022": 4,
+    "2023": 4,
+    "2024": 1,
+    "2025": 1,
+    "2026": 1
+  },
+  "formatos_exportados": [
+    "dataset_caixa_ai.json (RAG / Vector Store)",
+    "dataset_caixa_ai.jsonl (Embeddings / Fine-tuning)",
+    "knowledge_base_caixa.md (Prompting direto)",
+    "dataset_caixa_summary.json (Validação)"
+  ]
+}
